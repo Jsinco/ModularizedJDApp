@@ -1,0 +1,6 @@
+# Project version
+version: "${version}"
+
+# Authors
+authors:
+  - "Jonah"

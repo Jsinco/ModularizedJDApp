@@ -1,70 +1,46 @@
 package dev.jsinco.discord.events;
 
-import dev.jsinco.discord.FrameWorkLogger;
-import net.dv8tion.jda.api.events.GenericEvent;
-import net.dv8tion.jda.api.hooks.EventListener;
-import org.jetbrains.annotations.NotNull;
+import dev.jsinco.discord.logging.FrameWorkLogger;
+import dev.jsinco.discord.FrameWork;
+import dev.jsinco.discord.utility.ReflectionUtil;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public final class EventManager implements EventListener {
+/**
+ * Manages the registration of listener modules.
+ * Classes which don't have no-args constructors must handle their registration manually.
+ *
+ * @since 1.0
+ * @author Jonah
+ * @see ListenerModule
+ */
+public final class EventManager {
 
-    private static EventManager instance;
-
-    private final Map<Class<? extends GenericEvent>, List<Method>> methods = new HashMap<>();
-
-    private EventManager() {
+    /**
+     * Registers a listener module with the JDA instance.
+     * @param listenerModule The listener module to register.
+     */
+    public static void registerEvents(ListenerModule listenerModule) {
+        FrameWork.getDiscordApp().addEventListener(listenerModule);
+        FrameWorkLogger.info("Registered listener module! (" + listenerModule.getClass().getSimpleName() + ")");
     }
 
-    public static EventManager getInstance() {
-        if (instance == null) {
-            instance = new EventManager();
-        }
-        return instance;
-    }
+    public static void reflectivelyRegisterEvents() {
+        List<Class<?>> listenerClasses = ReflectionUtil.getAllClassesFor(ListenerModule.class);
 
+        int skipped = 0;
+        for (Class<?> listenerClass : listenerClasses) {
 
-    public void registerEvents(ListenerModule listener) {
-        for (Method method : listener.getClass().getDeclaredMethods()) {
-            if (!method.isAnnotationPresent(EventHandler.class)) {
-                continue;
-            }
-
-            Class<?>[] params = method.getParameterTypes();
-            if (params.length != 1 || !GenericEvent.class.isAssignableFrom(params[0])) {
-                continue;
-            }
-
-            Class<? extends GenericEvent> event = (Class<? extends GenericEvent>) params[0];
-            methods.computeIfAbsent(event, k -> new ArrayList<>()).add(method);
-        }
-    }
-
-    public void unregisterEvents(ListenerModule listener) {
-        for (List<Method> list : methods.values()) {
-            list.removeIf(method -> method.getDeclaringClass().equals(listener.getClass()));
-        }
-    }
-
-    @Override
-    public void onEvent(@NotNull GenericEvent event) {
-        List<Method> list = methods.get(event.getClass());
-        if (list == null) {
-            return;
-        }
-
-        for (Method method : list) {
             try {
-                method.invoke(this, event);
+                ListenerModule listenerModule = (ListenerModule) listenerClass.getDeclaredConstructor().newInstance();
+                listenerModule.register();
+            } catch (NoSuchMethodException ignored) {
+                // If the class doesn't have a no-args constructor, the developer has to register it manually
+                skipped++;
             } catch (Exception e) {
-                FrameWorkLogger.error("Error while invoking event " +
-                        event.getClass().getSimpleName() + " in " +
-                        method.getDeclaringClass().getSimpleName() + " : " + e.getMessage(), e);
+                FrameWorkLogger.error("An error occurred while registering listener module: " + listenerClass.getSimpleName(), e);
             }
         }
+        FrameWorkLogger.info("Finished registering listener modules! Skipped " + skipped + " classes.");
     }
 }
