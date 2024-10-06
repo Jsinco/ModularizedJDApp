@@ -1,6 +1,10 @@
 package dev.jsinco.discord;
 
 import dev.jsinco.discord.commands.CommandManager;
+import dev.jsinco.discord.console.ConsoleCommandManager;
+import dev.jsinco.discord.console.commands.DumpJDAInfoCommand;
+import dev.jsinco.discord.console.commands.HelpCommand;
+import dev.jsinco.discord.console.commands.StopCommand;
 import dev.jsinco.discord.events.EventManager;
 import dev.jsinco.discord.logging.FrameWorkLogger;
 import net.dv8tion.jda.api.JDA;
@@ -10,6 +14,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
+import java.util.Scanner;
 import java.util.Timer;
 
 public final class FrameWork {
@@ -42,6 +47,7 @@ public final class FrameWork {
 
         try {
             discordApp.awaitReady();
+            FrameWorkLogger.info("JDA ready!");
         } catch (InterruptedException e) {
             FrameWorkLogger.error("An error occurred while waiting for the JDA to be ready!", e);
         }
@@ -54,8 +60,14 @@ public final class FrameWork {
         // Re-register expired commands
         Timer timer = new Timer();
         CommandManager commandManager = new CommandManager();
-        commandManager.register();
         timer.schedule(commandManager, 0L, 300000L);
+        discordApp.addEventListener(commandManager);
+
+        // Console commands
+        ConsoleCommandManager.getInstance()
+                .registerCommand(new StopCommand())
+                .registerCommand(new HelpCommand())
+                .registerCommand(new DumpJDAInfoCommand());
     }
 
 

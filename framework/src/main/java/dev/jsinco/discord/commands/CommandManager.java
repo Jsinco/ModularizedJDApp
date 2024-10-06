@@ -25,7 +25,7 @@ import java.util.TimerTask;
  * @see CommandOption
  * @see DiscordCommand
  */
-public class CommandManager extends TimerTask implements ListenerModule {
+public class CommandManager extends TimerTask {
 
     private static final Map<String, CommandModule> COMMAND_MODULE_MAP = new HashMap<>();
 
