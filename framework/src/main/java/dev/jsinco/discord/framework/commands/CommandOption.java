@@ -1,4 +1,4 @@
-package dev.jsinco.discord.commands;
+package dev.jsinco.discord.framework.commands;
 
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 

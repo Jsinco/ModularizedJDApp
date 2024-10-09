@@ -1,6 +1,6 @@
-package dev.jsinco.discord.console;
+package dev.jsinco.discord.framework.console;
 
-import dev.jsinco.discord.logging.FrameWorkLogger;
+import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 
 import java.util.HashMap;
 import java.util.Map;

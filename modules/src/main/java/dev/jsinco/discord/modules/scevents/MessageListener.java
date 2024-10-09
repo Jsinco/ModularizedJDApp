@@ -1,6 +1,6 @@
-package dev.jsinco.discord.scevents;
+package dev.jsinco.discord.modules.scevents;
 
-import dev.jsinco.discord.events.ListenerModule;
+import dev.jsinco.discord.framework.events.ListenerModule;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 

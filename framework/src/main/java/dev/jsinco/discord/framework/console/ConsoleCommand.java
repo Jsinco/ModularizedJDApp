@@ -1,4 +1,4 @@
-package dev.jsinco.discord.console;
+package dev.jsinco.discord.framework.console;
 
 public interface ConsoleCommand {
     String name();

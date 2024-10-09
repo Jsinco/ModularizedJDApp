@@ -1,9 +1,8 @@
-package dev.jsinco.discord.commands;
+package dev.jsinco.discord.framework.commands;
 
-import dev.jsinco.discord.logging.FrameWorkLogger;
-import dev.jsinco.discord.FrameWork;
-import dev.jsinco.discord.utility.ReflectionUtil;
-import dev.jsinco.discord.events.ListenerModule;
+import dev.jsinco.discord.framework.reflect.ReflectionUtil;
+import dev.jsinco.discord.framework.logging.FrameWorkLogger;
+import dev.jsinco.discord.framework.FrameWork;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;

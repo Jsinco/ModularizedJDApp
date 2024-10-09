@@ -1,6 +1,6 @@
-package dev.jsinco.discord.events;
+package dev.jsinco.discord.framework.events;
 
-import dev.jsinco.discord.AbstractModule;
+import dev.jsinco.discord.framework.AbstractModule;
 
 /**
  * Interface for modules that listen for events.

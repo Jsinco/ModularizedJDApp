@@ -1,4 +1,4 @@
-package dev.jsinco.discord.logging;
+package dev.jsinco.discord.framework.logging;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;

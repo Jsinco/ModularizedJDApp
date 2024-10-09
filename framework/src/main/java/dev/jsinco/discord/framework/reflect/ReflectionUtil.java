@@ -1,6 +1,7 @@
-package dev.jsinco.discord.utility;
+package dev.jsinco.discord.framework.reflect;
 
-import dev.jsinco.discord.logging.FrameWorkLogger;
+import dev.jsinco.discord.framework.logging.FrameWorkLogger;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +13,7 @@ public final class ReflectionUtil {
 
     public static final String BASE_PACKAGE = "dev.jsinco.discord";
 
-    public static List<Class<?>> getAllClassesFor(Class<?> clazz) {
+    public static List<Class<?>> getAllClassesFor(@Nullable Class<?> clazz) {
 
         try {
             // Get the URL of the package and its directory structure
@@ -29,7 +30,7 @@ public final class ReflectionUtil {
         return List.of();
     }
 
-    private static List<Class<?>> findListenerClassesInPackage(String packageName, URL packageUrl, Class<?> classToSearchFor) throws IOException {
+    private static List<Class<?>> findListenerClassesInPackage(String packageName, URL packageUrl, @Nullable Class<?> classToSearchFor) throws IOException {
         // Convert the URL into a directory path
         File directory = new File(packageUrl.getFile());
 
@@ -52,7 +53,7 @@ public final class ReflectionUtil {
                     try {
                         Class<?> clazz = Class.forName(className);
                         // Check if the class extends ListenerModule
-                        if (classToSearchFor.isAssignableFrom(clazz)) {
+                        if (classToSearchFor == null || classToSearchFor.isAssignableFrom(clazz)) {
                             listenerClasses.add(clazz);
                         }
                     } catch (ClassNotFoundException e) {

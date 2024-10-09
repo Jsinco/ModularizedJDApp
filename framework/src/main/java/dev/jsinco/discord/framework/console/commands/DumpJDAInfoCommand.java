@@ -1,8 +1,8 @@
-package dev.jsinco.discord.console.commands;
+package dev.jsinco.discord.framework.console.commands;
 
-import dev.jsinco.discord.FrameWork;
-import dev.jsinco.discord.console.ConsoleCommand;
-import dev.jsinco.discord.logging.FrameWorkLogger;
+import dev.jsinco.discord.framework.console.ConsoleCommand;
+import dev.jsinco.discord.framework.FrameWork;
+import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import net.dv8tion.jda.api.JDA;
 
 public class DumpJDAInfoCommand implements ConsoleCommand {

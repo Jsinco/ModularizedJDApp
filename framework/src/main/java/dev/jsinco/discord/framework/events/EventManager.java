@@ -1,8 +1,8 @@
-package dev.jsinco.discord.events;
+package dev.jsinco.discord.framework.events;
 
-import dev.jsinco.discord.logging.FrameWorkLogger;
-import dev.jsinco.discord.FrameWork;
-import dev.jsinco.discord.utility.ReflectionUtil;
+import dev.jsinco.discord.framework.reflect.ReflectionUtil;
+import dev.jsinco.discord.framework.logging.FrameWorkLogger;
+import dev.jsinco.discord.framework.FrameWork;
 
 import java.util.List;
 

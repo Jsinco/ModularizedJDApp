@@ -1,7 +1,7 @@
-package dev.jsinco.discord.commands;
+package dev.jsinco.discord.framework.commands;
 
-import dev.jsinco.discord.AbstractModule;
-import dev.jsinco.discord.logging.FrameWorkLogger;
+import dev.jsinco.discord.framework.AbstractModule;
+import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.Nullable;
 
