@@ -10,7 +10,7 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "idea")
 
-    group = "dev.jsinco.discord"
+    group = "club.coding.discord"
     version = "1.0-SNAPSHOT"
 
     repositories {

@@ -13,8 +13,8 @@ And may have additional options or arguments.
 To write a command module, you must have a class which implements the `CommandModule` Interface and annotate it with `@DiscordCommand`
 
 ```java
-import dev.jsinco.discord.commands.CommandModule;
-import dev.jsinco.discord.commands.DiscordCommand;
+import club.coding.discord.commands.CommandModule;
+import club.coding.discord.commands.DiscordCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 @DiscordCommand(name = "testcommand", description = "Test command.")
@@ -35,7 +35,7 @@ Bots can listen for many types of events. To find a list of all, see JDA's docum
 To write an event module, you must have a class which implements the `EventModule` Interface and annotate it with `@SubscribeEvent`
 
 ```java
-import dev.jsinco.discord.events.ListenerModule;
+import club.coding.discord.events.ListenerModule;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
