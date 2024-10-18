@@ -2,10 +2,6 @@ plugins {
     java
 }
 
-tasks.jar {
-    enabled = false
-}
-
 subprojects {
     apply(plugin = "java")
     apply(plugin = "idea")

@@ -14,13 +14,27 @@ dependencies {
 }
 
 tasks {
+
+    // Run me with `gradlew build`
+    build {
+        dependsOn(shadowJar)
+    }
+
     processResources {
         outputs.upToDateWhen { false }
         println(project.version.toString())
         filter<ReplaceTokens>(mapOf(
-            "tokens" to mapOf("version" to project.version.toString().replace("/", "")),
+            "tokens" to mapOf("version" to project.version.toString()),
             "beginToken" to "\${",
             "endToken" to "}"
         ))
+    }
+
+    shadowJar {
+        archiveClassifier.set("")
+    }
+
+    jar {
+        enabled = false
     }
 }
