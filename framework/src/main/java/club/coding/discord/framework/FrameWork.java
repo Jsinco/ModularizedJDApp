@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class FrameWork {
 
     private static JDA discordApp;
+    private static final int MINIMUM_BOT_TOKEN_LENGTH = 50; // According to google it's 59 characters long. But I'll just use 50.
 
     public static JDA getDiscordApp() {
         return discordApp;
@@ -42,9 +43,9 @@ public final class FrameWork {
         String botToken = System.getenv("botToken");
         FrameWorkLogger.configureLogging();
 
-        if (botToken == null) {
+        if (botToken == null || botToken.length() < MINIMUM_BOT_TOKEN_LENGTH) {
             FrameWorkLogger.error("You must provide a Discord Bot token to run this application!");
-            FrameWorkLogger.error("Use JVM argument: -DbotToken=\"YOUR_BOT_TOKEN\"");
+            FrameWorkLogger.error("Use JVM argument: -DbotToken=YOUR_BOT_TOKEN");
             System.exit(0);
         }
 

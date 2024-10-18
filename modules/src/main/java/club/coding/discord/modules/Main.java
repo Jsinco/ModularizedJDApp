@@ -18,7 +18,7 @@ public class Main {
 
     @InjectStatic(from = FrameWork.class)
     private static JDA jda;
-    private static final SnakeYamlConfig saves = new SnakeYamlConfig("saves.yml");
+    private static final SnakeYamlConfig SAVES_FILE = new SnakeYamlConfig("saves.yml");
 
 
     public static void main(String[] args) {
