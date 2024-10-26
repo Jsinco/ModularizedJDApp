@@ -1,4 +1,8 @@
-# What is this?
+# HCC's Coding Club Discord Bot
+
+----
+
+# What is this? (Original ReadME)
 
 This is a Discord bot designed around modules to make adding features as easy as possible for inexperienced developers.
 
