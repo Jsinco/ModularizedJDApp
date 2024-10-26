@@ -31,10 +31,22 @@ tasks {
     }
 
     shadowJar {
+        manifest {
+            attributes(
+                "Main-Class" to "${project.group}.modules.Main"
+            )
+        }
+
+        archiveBaseName.set(project.name)
         archiveClassifier.set("")
     }
 
     jar {
+        /*manifest {
+            attributes(
+                "Main-Class" to "${project.group}.modules.Main"
+            )
+        }*/
         enabled = false
     }
 }

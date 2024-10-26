@@ -1,4 +1,4 @@
-rootProject.name = "DiscordBot"
+rootProject.name = "ModularizedJDApp"
 
 include("framework")
 include("modules")

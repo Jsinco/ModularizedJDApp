@@ -6,12 +6,11 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "idea")
 
-    group = "club.coding.discord"
+    group = "dev.jsinco.discord"
     version = "1.0-SNAPSHOT"
 
     repositories {
         mavenCentral()
-
     }
 
     dependencies {
@@ -27,5 +26,9 @@ subprojects {
         implementation("org.apache.logging.log4j:log4j-api:2.24.1")
         // Jetbrains Annotations
         implementation("org.jetbrains:annotations:25.0.0")
+
+        // lombok
+        compileOnly("org.projectlombok:lombok:1.18.30")
+        annotationProcessor("org.projectlombok:lombok:1.18.30")
     }
 }
