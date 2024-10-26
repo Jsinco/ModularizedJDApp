@@ -1,7 +1,7 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
-    id("com.gradleup.shadow") version "8.3.2"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 repositories {
@@ -13,12 +13,15 @@ dependencies {
     implementation("com.github.Jsinco:AbstractJavaFileLib:2.2")
 }
 
+
 tasks {
 
     // Run me with `gradlew build`
     build {
         dependsOn(shadowJar)
     }
+
+
 
     processResources {
         outputs.upToDateWhen { false }
@@ -30,23 +33,24 @@ tasks {
         ))
     }
 
+
+
+
     shadowJar {
-        manifest {
-            attributes(
-                "Main-Class" to "${project.group}.modules.Main"
-            )
+        dependencies {
+
         }
 
-        archiveBaseName.set(project.name)
+        archiveBaseName.set(project.rootProject.name)
         archiveClassifier.set("")
     }
 
     jar {
-        /*manifest {
+        manifest {
             attributes(
-                "Main-Class" to "${project.group}.modules.Main"
+                "Main-Class" to "dev.jsinco.discord.modules.Main",
             )
-        }*/
+        }
         enabled = false
     }
 }

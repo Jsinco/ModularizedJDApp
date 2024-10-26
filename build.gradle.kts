@@ -9,6 +9,15 @@ subprojects {
     group = "dev.jsinco.discord"
     version = "1.0-SNAPSHOT"
 
+
+
+    tasks.withType<JavaCompile>().configureEach {
+        options.encoding = "UTF-8"
+    }
+    java {
+        toolchain.languageVersion = JavaLanguageVersion.of(17) // im going with java 17
+    }
+
     repositories {
         mavenCentral()
     }
@@ -26,6 +35,9 @@ subprojects {
         implementation("org.apache.logging.log4j:log4j-api:2.24.1")
         // Jetbrains Annotations
         implementation("org.jetbrains:annotations:25.0.0")
+
+        // google guava
+        implementation("com.google.guava:guava:33.3.1-jre")
 
         // lombok
         compileOnly("org.projectlombok:lombok:1.18.30")

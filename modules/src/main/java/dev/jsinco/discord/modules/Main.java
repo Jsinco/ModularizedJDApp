@@ -25,8 +25,24 @@ public class Main {
 
 
     public static void main(String[] args) {
-        FileLibSettings.set(new File("C:\\Users\\jonah\\idea\\ModularizedJDApp\\testing"));
-        SAVES_FILE = new SnakeYamlConfig("saves.yml");
+        // Optional custom data folder stuff. In the future, we can use more than just these simple flat files from my lib.
+        String newDataFolderPath = System.getProperty("dataFolder");
+        if (newDataFolderPath == null) {
+            newDataFolderPath = System.getenv("dataFolder");
+        }
+
+        if (newDataFolderPath != null) {
+            File newFolder = new File(newDataFolderPath);
+            if (newFolder.exists() && newFolder.isDirectory()) {
+                FileLibSettings.set(newFolder);
+            } else {
+                System.out.println("Provided data folder does not exist or is not a directory. Using default data folder.");
+            }
+        }
+        System.out.println("Using " + FileLibSettings.getDataFolder().getPath() + " as data folder.");
+        SAVES_FILE = new SnakeYamlConfig("saves.yml"); // Init our main persistent data file.
+
+        // Start the framework
         FrameWork.start(Main.class);
     }
 

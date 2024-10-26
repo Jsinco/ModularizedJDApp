@@ -1,10 +1,6 @@
 package dev.jsinco.discord.framework.events;
 
-import dev.jsinco.discord.framework.reflect.ReflectionUtil;
-import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.FrameWork;
-
-import java.util.List;
 
 /**
  * Manages the registration of listener modules.

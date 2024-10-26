@@ -5,10 +5,13 @@ import dev.jsinco.discord.framework.commands.CommandModule;
 import dev.jsinco.discord.framework.console.ConsoleCommandManager;
 import dev.jsinco.discord.framework.console.commands.DumpJDAInfoCommand;
 import dev.jsinco.discord.framework.console.commands.HelpCommand;
+import dev.jsinco.discord.framework.console.commands.RestartCommand;
 import dev.jsinco.discord.framework.console.commands.StopCommand;
 import dev.jsinco.discord.framework.events.ListenerModule;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
+import dev.jsinco.discord.framework.reflect.JarReflect;
+import dev.jsinco.discord.framework.reflect.AlternativeCodeSourceReflect;
 import dev.jsinco.discord.framework.reflect.ReflectionUtil;
 import dev.jsinco.discord.framework.scheduling.Tickable;
 import lombok.Getter;
@@ -22,7 +25,6 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,18 +38,24 @@ public final class FrameWork {
 
     @Getter private static JDA discordApp;
     @Getter private static Timer timer;
+    @Getter private static Class<?> caller;
     private static final int MINIMUM_BOT_TOKEN_LENGTH = 50; // According to google it's 59 characters long. But I'll just use 50.
 
     public static void start(Class<?> caller) {
+        FrameWork.caller = caller;
         System.out.println("Starting " + caller.getCanonicalName());
         timer = new Timer(caller.getSimpleName() + "-GlobalTimer");
 
-        String botToken = System.getenv("botToken");
+        String botToken = System.getProperty("botToken");
+        if (botToken == null) {
+            botToken = System.getenv("botToken");
+        }
+
         FrameWorkLogger.configureLogging();
 
         if (botToken == null || botToken.length() < MINIMUM_BOT_TOKEN_LENGTH) {
             FrameWorkLogger.error("You must provide a Discord Bot token to run this application!");
-            FrameWorkLogger.error("Use JVM argument: -DbotToken=YOUR_BOT_TOKEN");
+            FrameWorkLogger.error("Use JVM argument: '-DbotToken=YOUR_BOT_TOKEN' or provide a bot token as environment variable: 'botToken'");
             System.exit(0);
         }
 
@@ -85,7 +93,9 @@ public final class FrameWork {
         ConsoleCommandManager.getInstance()
                 .registerCommand(new StopCommand())
                 .registerCommand(new HelpCommand())
-                .registerCommand(new DumpJDAInfoCommand());
+                .registerCommand(new DumpJDAInfoCommand())
+                .registerCommand(new RestartCommand());
+
     }
 
     public static void reflectivelyRegisterClasses() {

@@ -77,6 +77,7 @@ public class WrappedReminder implements ConfigurationSerializable {
     }
 
     public static WrappedReminder deserialize(String serialized) {
+        System.out.println(serialized);
         String[] parts = serialized.split(SPLIT_REGEX);
         if (parts.length < 6) {
             return WrappedReminder.builder()

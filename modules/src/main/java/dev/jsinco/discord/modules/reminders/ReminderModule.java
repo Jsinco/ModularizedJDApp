@@ -33,10 +33,9 @@ public class ReminderModule extends Tickable implements CommandModule {
     private static SnakeYamlConfig savesFile;
 
     public ReminderModule() {
-        if (!savesFile.contains(SAVE_REGION)) {
-            savesFile.set(SAVE_REGION, new ArrayList<String>());
+        if (savesFile.contains(SAVE_REGION)) {
+            WRAPPED_REMINDERS.addAll(savesFile.getStringList(SAVE_REGION).stream().map(WrappedReminder::deserialize).toList());
         }
-        WRAPPED_REMINDERS.addAll(savesFile.getStringList(SAVE_REGION).stream().map(WrappedReminder::deserialize).toList());
     }
 
 
