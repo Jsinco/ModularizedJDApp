@@ -8,16 +8,22 @@ import lombok.Getter;
 public class MessageFrequency implements ConfigurationSerializable {
 
     private final int number;
-    private final MessageFrequencyUnit unit;
+    private MessageFrequencyUnit unit;
 
     public MessageFrequency(int number, MessageFrequencyUnit unit) {
         this.number = number;
         this.unit = unit;
+        if (unit == null) {
+            this.unit = MessageFrequencyUnit.NEVER;
+        }
     }
 
     public MessageFrequency(String fromString) {
         this.number = Integer.parseInt(fromString.replaceAll("[^0-9]", ""));
         this.unit = Util.getEnumByName(MessageFrequencyUnit.class, fromString.replaceAll("[0-9]", ""));
+        if (unit == null) {
+            this.unit = MessageFrequencyUnit.NEVER;
+        }
     }
 
     public enum MessageFrequencyUnit {
@@ -42,7 +48,7 @@ public class MessageFrequency implements ConfigurationSerializable {
 
     public static MessageFrequency deserialize(String serialized) {
         String[] split = serialized.split("\\|");
-        return new MessageFrequency(Integer.parseInt(split[0]), MessageFrequencyUnit.valueOf(split[1]));
+        return new MessageFrequency(Integer.parseInt(split[0]), Util.getEnumByName(MessageFrequencyUnit.class, split[1]));
     }
 
 }

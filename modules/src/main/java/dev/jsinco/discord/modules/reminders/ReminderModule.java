@@ -52,7 +52,7 @@ public class ReminderModule extends Tickable implements CommandModule {
 
         WrappedReminder wrappedReminder = identifier == null ? new WrappedReminder(channel, message, frequency, when) : new WrappedReminder(identifier, channel, message, frequency, when);
         WRAPPED_REMINDERS.add(wrappedReminder);
-        event.reply("Scheduled message for " + when + " in " + channel.getAsMention() + " **Frequency " + frequency.toString() + "**").queue();
+        event.reply("Scheduled message for " + when + " in " + channel.getAsMention() + " **Frequency " + frequency + "**").queue();
     }
 
 

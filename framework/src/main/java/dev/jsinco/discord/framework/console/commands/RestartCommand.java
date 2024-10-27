@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+// FIXME
 public class RestartCommand implements ConsoleCommand {
     @Override
     public String name() {

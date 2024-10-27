@@ -44,7 +44,7 @@ public final class FrameWork {
     public static void start(Class<?> caller) {
         FrameWork.caller = caller;
         System.out.println("Starting " + caller.getCanonicalName());
-        timer = new Timer(caller.getSimpleName() + "-GlobalTimer");
+        timer = new Timer(caller.getSimpleName().toLowerCase() + "-scheduler");
 
         String botToken = System.getProperty("botToken");
         if (botToken == null) {
