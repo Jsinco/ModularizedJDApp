@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public class MessageFrequency implements ConfigurationSerializable {
 
-    private final int number;
+    private int number;
     private MessageFrequencyUnit unit;
 
     public MessageFrequency(int number, MessageFrequencyUnit unit) {
@@ -19,7 +19,11 @@ public class MessageFrequency implements ConfigurationSerializable {
     }
 
     public MessageFrequency(String fromString) {
-        this.number = Integer.parseInt(fromString.replaceAll("[^0-9]", ""));
+        try {
+            this.number = Integer.parseInt(fromString.replaceAll("[^0-9]", ""));
+        } catch (NumberFormatException e) {
+            this.number = 0;
+        }
         this.unit = Util.getEnumByName(MessageFrequencyUnit.class, fromString.replaceAll("[0-9]", ""));
         if (unit == null) {
             this.unit = MessageFrequencyUnit.NEVER;

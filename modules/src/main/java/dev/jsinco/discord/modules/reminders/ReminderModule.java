@@ -79,7 +79,7 @@ public class ReminderModule extends Tickable implements CommandModule {
             }
 
             TextChannel channel = (TextChannel) message.getChannel();
-            channel.sendMessage(message.getMessage() + "\n\n-# (reminder id: " + message.getIdentifier() + ")").queue();
+            channel.sendMessage(message.getMessage() + "\n-# (reminder id: " + message.getIdentifier() + ")").queue();
             message.setLastSent(LocalDateTime.now());
             FrameWorkLogger.info("Sent scheduled message in " + channel.getName() + " at " + LocalDateTime.now() + " with frequency " + message.getFrequency());
         }
