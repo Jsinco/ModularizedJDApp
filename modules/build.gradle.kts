@@ -15,15 +15,11 @@ dependencies {
     }
 }
 
-
 tasks {
-
     // Run me with `gradlew build`
     build {
         dependsOn(shadowJar)
     }
-
-
 
     processResources {
         outputs.upToDateWhen { false }
@@ -34,9 +30,6 @@ tasks {
             "endToken" to "}"
         ))
     }
-
-
-
 
     shadowJar {
         dependencies {

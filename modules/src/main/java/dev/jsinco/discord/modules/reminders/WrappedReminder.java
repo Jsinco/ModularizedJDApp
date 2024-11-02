@@ -71,13 +71,13 @@ public class WrappedReminder {
         } else {
             frequencyTruth = switch (frequency.getUnit()) {
                 case NEVER -> false;
-                case SEC -> lastSent.plusSeconds(frequency.getNumber()).isBefore(LocalDateTime.now());
+                //case SEC -> lastSent.plusSeconds(frequency.getNumber()).isBefore(LocalDateTime.now());
                 case MIN -> lastSent.plusMinutes(frequency.getNumber()).isBefore(LocalDateTime.now());
                 case HR -> lastSent.plusHours(frequency.getNumber()).isBefore(LocalDateTime.now());
                 case DAY -> lastSent.plusDays(frequency.getNumber()).isBefore(LocalDateTime.now());
                 case WEEK -> lastSent.plusWeeks(frequency.getNumber()).isBefore(LocalDateTime.now());
                 case MONTH -> lastSent.plusMonths(frequency.getNumber()).isBefore(LocalDateTime.now());
-                //case YEAR -> lastSent.plusYears(frequency.getNumber()).isBefore(LocalDateTime.now());
+                case YEAR -> lastSent.plusYears(frequency.getNumber()).isBefore(LocalDateTime.now());
             };
         }
 

@@ -78,19 +78,24 @@ public class CommandManager extends TimerTask {
         try {
             command.execute(event);
         } catch (Throwable throwable) {
-            FrameWorkLogger.error("An exception occurred while executing command: " + event.getName());
+            FrameWorkLogger.error("An exception occurred while executing command: " + event.getName(), throwable);
             if (event.isAcknowledged()) {
                 return;
             }
 
             if (settings.isSendErrors()) {
+                String cause = "Unknown Cause";
+                if (throwable.getCause() != null) {
+                    cause = throwable.getCause().getMessage();
+                }
                 event.replyEmbeds(new EmbedBuilder()
                         .setDescription(getMdFormattedStackTrace(throwable))
-                        .addField("Cause", throwable.getCause().getMessage(), true)
+                        .addField("Cause", cause, true)
                         .addField("Message", throwable.getMessage(), true)
                         .setTitle("**An exception occurred while executing this command**")
-                        .setColor(Color.PINK).build()).addActionRow(
-                        Button.of(ButtonStyle.PRIMARY, "commandmanager-show-errors", "Show Exceptions?", Emoji.fromUnicode("U+1F6A6"))
+                        .setColor(Color.PINK).build())
+                        .addActionRow(
+                            Button.of(ButtonStyle.PRIMARY, "commandmanager-show-errors", "Show Exceptions?", Emoji.fromUnicode("U+1F6A6"))
                 ).queue();
             } else {
                 event.replyEmbeds(new EmbedBuilder()
@@ -125,20 +130,20 @@ public class CommandManager extends TimerTask {
     private String getMdFormattedStackTrace(Throwable throwable) {
         StringBuilder builder = new StringBuilder();
         for (StackTraceElement element : throwable.getStackTrace()) {
-            if (element.getClass().getPackage() == FrameWork.getCaller().getPackage()) {
-                builder.append(element).append("\n");
+            if (element.getClassName().startsWith(FrameWork.getCaller().getPackageName()) || element.getClassName().startsWith("dev.jsinco.discord.framework")) {
+                builder.append('[').append(element).append(']').append('(').append(getGithubFileUrlFromStackElement(element)).append(')').append("\n");
             } else {
-                builder.append('(').append(element).append(')').append('[').append(getGithubFileUrlFromStackElement(element)).append(']').append("\n");
+                builder.append(element).append("\n");
             }
         }
         return builder.toString();
     }
 
-    public String getGithubFileURLFromClass(Class<?> clazz) {
-        return settings.getRepository() + "blob/" + settings.getBranch() + "/" + clazz.getName().replace(".", "/") + ".java";
-    }
 
     public String getGithubFileUrlFromStackElement(StackTraceElement element) {
-        return settings.getRepository() + "blob/" + settings.getBranch() + "/" + element.getClassName().replace(".", "/") + ".java#L" + element.getLineNumber();
+        if (element.getClassName().contains("framework")) {
+            return settings.getRepository() + "blob/" + settings.getBranch() + "/framework/src/main/java/"  + element.getClassName().replace(".", "/") + ".java#L" + element.getLineNumber();
+        }
+        return settings.getRepository() + "blob/" + settings.getBranch() + "/" + settings.getModule() + "/" + element.getClassName().replace(".", "/") + ".java#L" + element.getLineNumber();
     }
 }

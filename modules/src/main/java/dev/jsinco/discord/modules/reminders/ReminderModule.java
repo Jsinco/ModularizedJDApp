@@ -22,14 +22,15 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-@Tick(unit = TimeUnit.SECONDS, period = 10)
+@Tick(unit = TimeUnit.MINUTES, period = 1)
 @DiscordCommand(name = "reminder", permission = Permission.MANAGE_CHANNEL,
         description = "Schedule a message to be sent at a later time, or to be repeated at certain times.")
 public class ReminderModule extends Tickable implements CommandModule {
 
     @Getter
-    private static final List<WrappedReminder> WRAPPED_REMINDERS = new ArrayList<>();
+    private static final ConcurrentLinkedQueue<WrappedReminder> WRAPPED_REMINDERS = new ConcurrentLinkedQueue<>();
     private static final String SAVE_REGION = "scheduledMessages";
     @InjectStatic(value = Main.class)
     private static SnakeYamlConfig savesFile;
@@ -87,9 +88,7 @@ public class ReminderModule extends Tickable implements CommandModule {
 
         for (WrappedReminder message : WRAPPED_REMINDERS) {
             if (!message.shouldSendNow()) {
-                continue;
-            } else if (!message.isValid()) {
-                WRAPPED_REMINDERS.remove(message);
+                if (!message.isValid()) WRAPPED_REMINDERS.remove(message);
                 continue;
             }
 
@@ -97,10 +96,8 @@ public class ReminderModule extends Tickable implements CommandModule {
             FrameWorkLogger.info("Sent scheduled message in " + message.getChannel().getName() + " at " + LocalDateTime.now() + " with frequency " + message.getFrequency());
         }
 
-        if (savesFile.getStringList(SAVE_REGION).size() != WRAPPED_REMINDERS.size()) {
-            savesFile.set(SAVE_REGION, WRAPPED_REMINDERS.stream().map(serdes::serialize).toList());
-            savesFile.save();
-        }
+        savesFile.set(SAVE_REGION, WRAPPED_REMINDERS.stream().map(serdes::serialize).toList());
+        savesFile.save();
     }
 }
 

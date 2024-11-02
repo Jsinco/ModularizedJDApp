@@ -1,4 +1,4 @@
-package dev.jsinco.discord.modules.commands;
+package dev.jsinco.discord.modules.info;
 
 import dev.jsinco.discord.framework.commands.CommandModule;
 import dev.jsinco.discord.framework.commands.DiscordCommand;
@@ -9,7 +9,7 @@ public class SystemInfoCommand implements CommandModule {
     @DiscordCommand(name = "system", description = "Displays system information")
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        event.reply("System Info: \n" +
+        event.reply("Running on: \n" +
                 "  * OS: " + System.getProperty("os.name") + " " + System.getProperty("os.version") + "\n" +
                 "  * Architecture: " + System.getProperty("os.arch") + "\n" +
                 "  * Available processors (cores): " + Runtime.getRuntime().availableProcessors() + "\n" +

@@ -1,5 +1,6 @@
 package dev.jsinco.discord.framework.logging;
 
+import lombok.Getter;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -16,7 +17,18 @@ import org.slf4j.LoggerFactory;
  */
 public final class FrameWorkLogger {
 
+    @Getter
     private static final Logger logger = LoggerFactory.getLogger(FrameWorkLogger.class);
+
+    // Create a PatternLayout with the desired format
+    @Getter
+    private static PatternLayout layout = PatternLayout.newBuilder()
+            .withPattern("[%d{HH:mm:ss} %c{1}/%thread]: %msg%n")
+            .build();
+
+    // Create a ConsoleAppender and associate it with the PatternLayout
+    @Getter
+    private static ConsoleAppender consoleAppender = ConsoleAppender.createDefaultAppenderForLayout(layout);
 
     public static void info(String message) {
         logger.info(message);
@@ -35,13 +47,7 @@ public final class FrameWorkLogger {
     }
 
     public static void configureLogging() {
-        // Create a PatternLayout with the desired format
-        PatternLayout layout = PatternLayout.newBuilder()
-                .withPattern("[%d{HH:mm:ss} %c{1}/%thread]: %msg%n")
-                .build();
 
-        // Create a ConsoleAppender and associate it with the PatternLayout
-        ConsoleAppender consoleAppender = ConsoleAppender.createDefaultAppenderForLayout(layout);
 
         // Get the current Log4j2 configuration
         LoggerContext context = (LoggerContext) LogManager.getContext(false);

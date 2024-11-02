@@ -31,12 +31,12 @@ public class MessageFrequency {
 
     public enum MessageFrequencyUnit {
         NEVER,
-        SEC,
         MIN,
         HR,
         DAY,
         WEEK,
-        MONTH
+        MONTH,
+        YEAR
     }
 
     @Override

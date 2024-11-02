@@ -1,4 +1,4 @@
-package dev.jsinco.discord.modules.commands;
+package dev.jsinco.discord.modules.info;
 
 import dev.jsinco.discord.framework.commands.CommandModule;
 import dev.jsinco.discord.framework.commands.DiscordCommand;
