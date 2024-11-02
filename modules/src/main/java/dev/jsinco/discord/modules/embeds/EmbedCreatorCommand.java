@@ -12,14 +12,15 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.Color;
 import java.util.List;
 
 @DiscordCommand(name = "embed", description = "Create an embed", permission = Permission.MANAGE_CHANNEL)
 public class EmbedCreatorCommand implements CommandModule {
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        Pair<String, String> body = this.parseTitle(Util.getOptionOrNull(event.getOption("body"), OptionType.STRING, "Should not be null"));
-        String color = Util.getOptionOrNull(event.getOption("color"), OptionType.STRING, "#000000");
+        Pair<String, String> body = Util.parseTitle(Util.getOptionOrNull(event.getOption("body"), OptionType.STRING, "Should not be null"));
+        String color = Util.getOptionOrNull(event.getOption("color"), OptionType.STRING, "#FFAFAF");
         String thumbnail = Util.getOptionOrNull(event.getOption("thumbnail"), OptionType.STRING);
 
         String[] fields = new String[] {Util.getOptionOrNull(event.getOption("field_1"), OptionType.STRING),
@@ -42,7 +43,7 @@ public class EmbedCreatorCommand implements CommandModule {
                 continue;
             }
 
-            Pair<String, String> fieldPair = this.parseTitle(field);
+            Pair<String, String> fieldPair = Util.parseTitle(field);
             embedBuilder.addField(fieldPair.first(), fieldPair.second(), true);
         }
 
@@ -75,28 +76,6 @@ public class EmbedCreatorCommand implements CommandModule {
         );
     }
 
-    private Pair<String, String> parseTitle(@Nullable String string) {
-        if (string == null) {
-            return null;
-        } else if (!string.contains("title=")) {
-            return new Pair<>(this.getFirstWords(string, 3), string);
-        }
-
-        String title = string.substring(string.indexOf("title=\"") + 7, string.indexOf("\"", string.indexOf("title=\"") + 7));
-        String body = string.replace("title=\"" + title + "\"", "");
-        return new Pair<>(title, body);
-    }
 
 
-    private String getFirstWords(String text, int amt) {
-        String[] words = text.split("\\s+");
-        StringBuilder firstThree = new StringBuilder();
-        for (int i = 0; i < Math.min(amt, words.length); i++) {
-            if (i > 0) {
-                firstThree.append(" ");
-            }
-            firstThree.append(words[i]);
-        }
-        return firstThree.toString();
-    }
 }

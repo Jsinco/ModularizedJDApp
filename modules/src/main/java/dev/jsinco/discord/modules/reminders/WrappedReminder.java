@@ -3,6 +3,9 @@ package dev.jsinco.discord.modules.reminders;
 import dev.jsinco.discord.framework.serdes.TypeAdapter;
 import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
+import dev.jsinco.discord.framework.util.Pair;
+import dev.jsinco.discord.modules.embeds.EmbedCreatorCommand;
+import dev.jsinco.discord.modules.util.Util;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,27 +36,27 @@ public class WrappedReminder {
 
 
     public boolean isValid() {
-        return (frequency.getUnit() != MessageFrequency.MessageFrequencyUnit.NEVER || lastSent == null) && frequency.getNumber() > 0;
+        if (frequency.getUnit() == MessageFrequency.MessageFrequencyUnit.NEVER || frequency.getNumber() <= 0) {
+            return false;
+        }
+        return true;
     }
 
     public Message send() {
-        return this.send(this.channel, false);
+        return this.send(this.channel);
     }
 
-    public Message send(TextChannel channel, boolean preview) {
+    public Message send(TextChannel channel) {
+        lastSent = LocalDateTime.now();
         EmbedBuilder embedBuilder = new EmbedBuilder();
         String message = this.message;
         String title = "Reminder";
-        if (message.contains("TITLE=")) {
-            title = message.substring(message.indexOf("TITLE=") + 6, message.indexOf(",END"));
-            message = message.replace("TITLE=" + title, "").replace(",END", "");
+        if (message.contains("title=")) {
+            Pair<String, String> titleBody = Util.parseTitle(message, "Reminder");
+            title = titleBody.first();
+            message = titleBody.second();
         }
 
-        if (preview) {
-            title = "Preview: " + title;
-        } else {
-            lastSent = LocalDateTime.now();
-        }
 
         embedBuilder.setTitle("**" + title + "**");
         embedBuilder.setDescription(message);

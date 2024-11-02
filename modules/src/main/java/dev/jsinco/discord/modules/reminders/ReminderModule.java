@@ -1,7 +1,6 @@
 package dev.jsinco.discord.modules.reminders;
 
 import dev.jsinco.abstractjavafilelib.schemas.SnakeYamlConfig;
-import dev.jsinco.discord.framework.commands.CommandModule;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.scheduling.TimeUnit;
 import dev.jsinco.discord.framework.scheduling.Tick;
@@ -9,25 +8,30 @@ import dev.jsinco.discord.framework.scheduling.Tickable;
 import dev.jsinco.discord.framework.commands.DiscordCommand;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.serdes.Serdes;
+import dev.jsinco.discord.framework.util.Module;
 import dev.jsinco.discord.modules.Main;
 import dev.jsinco.discord.modules.util.Util;
 import lombok.Getter;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-@Tick(unit = TimeUnit.MINUTES, period = 1)
+@Tick(unit = TimeUnit.SECONDS, period = 30)
 @DiscordCommand(name = "reminder", permission = Permission.MANAGE_CHANNEL,
         description = "Schedule a message to be sent at a later time, or to be repeated at certain times.")
-public class ReminderModule extends Tickable implements CommandModule {
+public class ReminderModule extends Tickable implements Module {
 
     @Getter
     private static final ConcurrentLinkedQueue<WrappedReminder> WRAPPED_REMINDERS = new ConcurrentLinkedQueue<>();
@@ -63,8 +67,27 @@ public class ReminderModule extends Tickable implements CommandModule {
                 .when(Util.parseDateTime(date, time))
                 .build();
         WRAPPED_REMINDERS.add(wrappedReminder);
-        event.reply("Scheduled message for " + date + "T" + time + " in " + channel.getAsMention() + " **Frequency " + interval + "F" + repeat + "**").queue();
-        wrappedReminder.send((TextChannel) event.getChannel(), true);
+
+        StringBuilder sb = new StringBuilder("Reminder Scheduled\n");
+        sb.append("- Date: **" + wrappedReminder.getWhen().toLocalDate() + "**\n");
+        sb.append("- Time: **" + wrappedReminder.getWhen().toLocalTime() + "**\n");
+        sb.append("- Channel: <#" + channel.getId() + ">\n");
+        sb.append("- Frequency: **" + interval + ";" + repeat + "**\n");
+        sb.append("- Message: `" + message + "`\n");
+
+        event.reply(sb.toString())
+                .addActionRow(
+                        Button.of(ButtonStyle.DANGER, "remindermodule-remove;" + identifier, "Delete Reminder", Emoji.fromUnicode("U+1F5D1"))
+                ).queue();
+    }
+
+    @SubscribeEvent
+    public void onButtonClick(ButtonInteractionEvent event) {
+        if (!event.getComponentId().startsWith("remindermodule-remove;")) return;
+
+        String identifier = event.getComponentId().split(";")[1];
+        WRAPPED_REMINDERS.removeIf(it -> it.getIdentifier().equals(identifier));
+        event.reply("Reminder removed. \n-# Id: " + identifier).queue();
     }
 
 
@@ -88,7 +111,9 @@ public class ReminderModule extends Tickable implements CommandModule {
 
         for (WrappedReminder message : WRAPPED_REMINDERS) {
             if (!message.shouldSendNow()) {
-                if (!message.isValid()) WRAPPED_REMINDERS.remove(message);
+                if (!message.isValid()) {
+                    WRAPPED_REMINDERS.remove(message);
+                }
                 continue;
             }
 

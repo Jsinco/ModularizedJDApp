@@ -87,10 +87,8 @@ public final class FrameWork {
         discordApp.setEventManager(new AnnotatedEventManager());
         reflectivelyRegisterClasses();
 
-        // Re-register expired commands
-        CommandManager commandManager = new CommandManager();
-        timer.schedule(commandManager, 0L, 300000L);
-        discordApp.addEventListener(commandManager); // Manually add this event listener
+
+        discordApp.addEventListener(new CommandManager()); // Manually add this event listener
 
         // Console commands
         ConsoleCommandManager.getInstance()

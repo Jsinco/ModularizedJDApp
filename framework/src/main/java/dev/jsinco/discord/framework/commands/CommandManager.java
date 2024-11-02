@@ -20,7 +20,6 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimerTask;
 
 /**
  * Manages all registered commands.
@@ -29,7 +28,7 @@ import java.util.TimerTask;
  * @see CommandModule
  * @see DiscordCommand
  */
-public class CommandManager extends TimerTask {
+public class CommandManager {
 
     private static final Map<String, CommandModule> COMMAND_MODULE_MAP = new HashMap<>();
     private final Settings settings = FrameWork.getFileManager().getSettings();
@@ -121,11 +120,6 @@ public class CommandManager extends TimerTask {
         event.reply("Exceptions will now be **" + (settings.isSendErrors() ? "shown" : "hidden") + "**.").setEphemeral(true).queue();
     }
 
-    @Override
-    public void run() {
-        // re-register commands in case of expiration
-        COMMAND_MODULE_MAP.values().forEach(CommandManager::registerCommand);
-    }
 
     private String getMdFormattedStackTrace(Throwable throwable) {
         StringBuilder builder = new StringBuilder();

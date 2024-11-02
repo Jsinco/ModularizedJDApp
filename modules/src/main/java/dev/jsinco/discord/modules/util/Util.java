@@ -1,5 +1,6 @@
 package dev.jsinco.discord.modules.util;
 
+import dev.jsinco.discord.framework.util.Pair;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -99,5 +100,34 @@ public final class Util {
                 Integer.valueOf(hex.substring(3, 5), 16),
                 Integer.valueOf(hex.substring(5, 7), 16)
         );
+    }
+
+    public static Pair<String, String> parseTitle(@Nullable String string) {
+        return parseTitle(string, null);
+    }
+
+    public static Pair<String, String> parseTitle(@Nullable String string, @Nullable String defaultTitle) {
+        if (string == null) {
+            return null;
+        } else if (!string.contains("title=")) {
+            return new Pair<>(getFirstWords(string, 3), string);
+        }
+
+        String title = string.substring(string.indexOf("title=\"") + 7, string.indexOf("\"", string.indexOf("title=\"") + 7));
+        String body = string.replace("title=\"" + title + "\"", "");
+        return new Pair<>(title, body);
+    }
+
+
+    public static String getFirstWords(String text, int amt) {
+        String[] words = text.split("\\s+");
+        StringBuilder firstThree = new StringBuilder();
+        for (int i = 0; i < Math.min(amt, words.length); i++) {
+            if (i > 0) {
+                firstThree.append(" ");
+            }
+            firstThree.append(words[i]);
+        }
+        return firstThree.toString();
     }
 }
