@@ -1,7 +1,5 @@
 package dev.jsinco.discord.framework.reflect;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,6 +14,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface InjectStatic {
-    Class<?> from();
+    Class<?> value();
     String specificField() default "";
 }

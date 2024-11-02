@@ -1,7 +1,6 @@
 package dev.jsinco.discord.modules.reminders;
 
 import dev.jsinco.discord.framework.commands.CommandModule;
-import dev.jsinco.discord.framework.commands.CommandOption;
 import dev.jsinco.discord.framework.commands.DiscordCommand;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -28,8 +27,8 @@ public class ReminderDeleteCommand implements CommandModule {
         }
     }
 
-    @Override
-    public List<CommandOption> getOptions() {
-        return List.of(CommandOption.builder().name("id").optionType(OptionType.STRING).description("The identifier of the scheduled message to delete.").required(false).build());
-    }
+//    @Override
+//    public List<OptionBuilder> getOptions() {
+//        return List.of(OptionBuilder.builder().name("id").optionType(OptionType.STRING).description("The identifier of the scheduled message to delete.").required(false).build());
+//    }
 }

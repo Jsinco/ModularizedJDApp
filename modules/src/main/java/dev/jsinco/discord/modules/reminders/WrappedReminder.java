@@ -1,53 +1,68 @@
 package dev.jsinco.discord.modules.reminders;
 
-import dev.jsinco.discord.framework.util.ConfigurationSerializable;
+import dev.jsinco.discord.framework.serdes.TypeAdapter;
 import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
-import dev.jsinco.discord.modules.Util;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.channel.Channel;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
+import java.awt.Color;
 import java.time.LocalDateTime;
 
-@AllArgsConstructor
-@Builder
-@Getter
-@Setter
-public class WrappedReminder implements ConfigurationSerializable {
+@TypeAdapter(WrappedReminderTypeAdapter.class) // Custom TypeAdapter for GSON
+@AllArgsConstructor @Builder @Getter @Setter // lombok stuff
+public class WrappedReminder {
 
-    @InjectStatic(from = FrameWork.class)
+    @InjectStatic(value = FrameWork.class)
     private static JDA jda;
-    private static final String SPLIT_REGEX = "%@#%";
+
 
     private final String identifier;
-    private final Channel channel;
+    private final TextChannel channel;
     private final String message;
     private final MessageFrequency frequency;
-    private final String when;
+    private final LocalDateTime when;
 
     private LocalDateTime lastSent;
 
-    public WrappedReminder(Channel channel, String message, MessageFrequency frequency, String when) {
-        this.identifier = "SCHEDULED_MESSAGE-#" + ReminderModule.getWRAPPED_REMINDERS().size();
-        this.channel = channel;
-        this.message = message;
-        this.frequency = frequency;
-        this.when = when;
-        this.lastSent = null;
+
+    public boolean isValid() {
+        return (frequency.getUnit() != MessageFrequency.MessageFrequencyUnit.NEVER || lastSent == null) && frequency.getNumber() > 0;
     }
 
-    public WrappedReminder(String identifier, Channel channel, String message, MessageFrequency frequency, String when) {
-        this.identifier = identifier;
-        this.channel = channel;
-        this.message = message;
-        this.frequency = frequency;
-        this.when = when;
-        this.lastSent = null;
+    public Message send() {
+        return this.send(this.channel, false);
     }
+
+    public Message send(TextChannel channel, boolean preview) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        String message = this.message;
+        String title = "Reminder";
+        if (message.contains("TITLE=")) {
+            title = message.substring(message.indexOf("TITLE=") + 6, message.indexOf(",END"));
+            message = message.replace("TITLE=" + title, "").replace(",END", "");
+        }
+
+        if (preview) {
+            title = "Preview: " + title;
+        } else {
+            lastSent = LocalDateTime.now();
+        }
+
+        embedBuilder.setTitle("**" + title + "**");
+        embedBuilder.setDescription(message);
+        embedBuilder.setFooter("Id: " + identifier);
+        embedBuilder.setColor(Color.PINK);
+        embedBuilder.setThumbnail(channel.getGuild().getIconUrl());
+        return channel.sendMessageEmbeds(embedBuilder.build()).complete();
+    }
+
 
     public boolean shouldSendNow() {
         boolean frequencyTruth;
@@ -66,35 +81,7 @@ public class WrappedReminder implements ConfigurationSerializable {
             };
         }
 
-        return frequencyTruth && Util.parseDateTime(when).isBefore(LocalDateTime.now());
+        return frequencyTruth && LocalDateTime.now().isAfter(when);
     }
 
-    public String serialize() {
-        if (lastSent == null) {
-            return String.join(SPLIT_REGEX, identifier, channel.getId(), message, frequency.serialize(), when);
-        }
-        return String.join(SPLIT_REGEX, identifier, channel.getId(), message, frequency.serialize(), when, lastSent.toString());
-    }
-
-    public static WrappedReminder deserialize(String serialized) {
-        System.out.println(serialized);
-        String[] parts = serialized.split(SPLIT_REGEX);
-        if (parts.length < 6) {
-            return WrappedReminder.builder()
-                    .identifier(parts[0])
-                    .channel(jda.getGuildChannelById(parts[1]))
-                    .message(parts[2])
-                    .frequency(MessageFrequency.deserialize(parts[3]))
-                    .when(parts[4])
-                    .build();
-        }
-        return WrappedReminder.builder()
-                .identifier(parts[0])
-                .channel(jda.getGuildChannelById(parts[1]))
-                .message(parts[2])
-                .frequency(MessageFrequency.deserialize(parts[3]))
-                .when(parts[4])
-                .lastSent(LocalDateTime.parse(parts[5]))
-                .build();
-    }
 }

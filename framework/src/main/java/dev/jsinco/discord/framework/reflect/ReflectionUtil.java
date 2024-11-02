@@ -1,9 +1,11 @@
 package dev.jsinco.discord.framework.reflect;
 
 import dev.jsinco.discord.framework.FrameWork;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URL;
 import java.security.CodeSource;
+import java.util.Arrays;
 import java.util.Set;
 
 /**
@@ -22,5 +24,18 @@ public class ReflectionUtil {
             }
         }
         return AlternativeCodeSourceReflect.getAllClassesFor(classes);
+    }
+
+    @Nullable
+    public static Object getInstance(Class<?> clazz, Object... args) {
+        try {
+            if (args.length == 0) {
+                return clazz.getDeclaredConstructor().newInstance();
+            } else {
+                return clazz.getDeclaredConstructor(Arrays.stream(args).map(Object::getClass).toArray(Class[]::new)).newInstance(args);
+            }
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

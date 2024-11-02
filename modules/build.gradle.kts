@@ -10,7 +10,9 @@ repositories {
 
 dependencies {
     implementation(project(":framework"))
-    implementation("com.github.Jsinco:AbstractJavaFileLib:2.2")
+    implementation("com.github.Jsinco:AbstractJavaFileLib:2.2") {
+        exclude("com.google.gson", "gson")
+    }
 }
 
 
@@ -40,7 +42,6 @@ tasks {
         dependencies {
 
         }
-
         archiveBaseName.set(project.rootProject.name)
         archiveClassifier.set("")
     }

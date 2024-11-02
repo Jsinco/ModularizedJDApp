@@ -12,6 +12,7 @@ import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.reflect.ReflectionUtil;
 import dev.jsinco.discord.framework.scheduling.Tickable;
+import dev.jsinco.discord.framework.settings.FrameWorkFileManager;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -22,6 +23,7 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.Timer;
@@ -37,12 +39,13 @@ public final class FrameWork {
     @Getter private static JDA discordApp;
     @Getter private static Timer timer;
     @Getter private static Class<?> caller;
+    @Getter private static FrameWorkFileManager fileManager;
+
     private static final int MINIMUM_BOT_TOKEN_LENGTH = 50; // According to google it's 59 characters long. But I'll just use 50.
 
-    public static void start(Class<?> caller) {
+    public static void start(Class<?> caller, Path dataFolderPath) {
         FrameWork.caller = caller;
         System.out.println("Starting " + caller.getCanonicalName());
-        timer = new Timer(caller.getSimpleName().toLowerCase() + "-scheduler");
 
         String botToken = System.getProperty("botToken");
         if (botToken == null) {
@@ -58,6 +61,8 @@ public final class FrameWork {
         }
 
         botToken = botToken.replace(" ", "").trim();
+        timer = new Timer(caller.getSimpleName().toLowerCase() + "-scheduler");
+        fileManager = new FrameWorkFileManager(dataFolderPath);
 
         discordApp = JDABuilder.createDefault(botToken)
                 .enableIntents(GatewayIntent.GUILD_MESSAGES,
@@ -94,6 +99,8 @@ public final class FrameWork {
                 .registerCommand(new DumpJDAInfoCommand())
                 .registerCommand(new RestartCommand());
 
+        // one last injection
+        injectStaticFields();
     }
 
     public static void reflectivelyRegisterClasses() {
@@ -138,7 +145,7 @@ public final class FrameWork {
                 if (annotation == null || !Modifier.isStatic(callerField.getModifiers())) {
                     continue;
                 }
-                Class<?> from = annotation.from();
+                Class<?> from = annotation.value();
                 if (from == null) {
                     continue;
                 }

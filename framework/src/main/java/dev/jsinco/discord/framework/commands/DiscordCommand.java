@@ -12,7 +12,6 @@ import java.lang.annotation.Target;
  * Should be placed on either class or method with a class that implements CommandModule.
  * @see CommandModule
  * @see CommandManager
- * @see CommandOption
  * @since 1.0
  * @author Jonah
  */

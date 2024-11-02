@@ -1,5 +1,6 @@
 package dev.jsinco.discord.framework.reflect;
 
+import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +13,7 @@ import java.util.Set;
 
 public final class AlternativeCodeSourceReflect {
 
-    public static final String BASE_PACKAGE = "dev.jsinco.discord";
+    public static final String BASE_PACKAGE = FrameWork.getCaller().getPackageName();
 
     public static Set<Class<?>> getAllClassesFor(@Nullable Class<?>... classes) {
 

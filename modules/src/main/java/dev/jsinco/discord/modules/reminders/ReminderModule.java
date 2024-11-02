@@ -6,16 +6,18 @@ import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.scheduling.TimeUnit;
 import dev.jsinco.discord.framework.scheduling.Tick;
 import dev.jsinco.discord.framework.scheduling.Tickable;
-import dev.jsinco.discord.framework.commands.CommandOption;
 import dev.jsinco.discord.framework.commands.DiscordCommand;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
+import dev.jsinco.discord.framework.serdes.Serdes;
 import dev.jsinco.discord.modules.Main;
+import dev.jsinco.discord.modules.util.Util;
 import lombok.Getter;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,42 +31,52 @@ public class ReminderModule extends Tickable implements CommandModule {
     @Getter
     private static final List<WrappedReminder> WRAPPED_REMINDERS = new ArrayList<>();
     private static final String SAVE_REGION = "scheduledMessages";
-    @InjectStatic(from = Main.class)
+    @InjectStatic(value = Main.class)
     private static SnakeYamlConfig savesFile;
+
+    private final Serdes serdes = Serdes.getSingleton();
 
     public ReminderModule() {
         if (savesFile.contains(SAVE_REGION)) {
-            WRAPPED_REMINDERS.addAll(savesFile.getStringList(SAVE_REGION).stream().map(WrappedReminder::deserialize).toList());
+            WRAPPED_REMINDERS.addAll(savesFile.getStringList(SAVE_REGION).stream().map(it -> serdes.deserialize(it, WrappedReminder.class)).toList());
         }
     }
 
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        String identifier = null;
-        if (event.getOption("id") != null) {
-            identifier = event.getOption("id").getAsString();
-        }
-        Channel channel = event.getOption("channel").getAsChannel();
-        String message = event.getOption("message").getAsString();
-        MessageFrequency frequency = new MessageFrequency(event.getOption("frequency").getAsString().toUpperCase());
-        String when = event.getOption("when").getAsString();
 
-        WrappedReminder wrappedReminder = identifier == null ? new WrappedReminder(channel, message, frequency, when) : new WrappedReminder(identifier, channel, message, frequency, when);
+        String message = Util.getOptionOrNull(event.getOption("message"), OptionType.STRING);
+        String time = Util.getOptionOrNull(event.getOption("time"), OptionType.STRING);
+        Channel channel = Util.getOptionOrNull(event.getOption("channel"), OptionType.CHANNEL, event.getChannel());
+        String date = Util.getOptionOrNull(event.getOption("date"), OptionType.STRING);
+        MessageFrequency.MessageFrequencyUnit repeat = Util.getEnumByName(MessageFrequency.MessageFrequencyUnit.class, Util.getOptionOrNull(event.getOption("repeat"), OptionType.STRING, "NEVER"));
+        int interval = Util.getOptionOrNull(event.getOption("interval"), OptionType.INTEGER, 1);
+        String identifier = Util.getOptionOrNull(event.getOption("id"), OptionType.STRING, "reminder #" + WRAPPED_REMINDERS.size());
+
+        WrappedReminder wrappedReminder = new WrappedReminder.WrappedReminderBuilder()
+                .identifier(identifier)
+                .channel((TextChannel) channel)
+                .message(message)
+                .frequency(new MessageFrequency(interval, repeat))
+                .when(Util.parseDateTime(date, time))
+                .build();
         WRAPPED_REMINDERS.add(wrappedReminder);
-        event.reply("Scheduled message for " + when + " in " + channel.getAsMention() + " **Frequency " + frequency + "**").queue();
+        event.reply("Scheduled message for " + date + "T" + time + " in " + channel.getAsMention() + " **Frequency " + interval + "F" + repeat + "**").queue();
+        wrappedReminder.send((TextChannel) event.getChannel(), true);
     }
 
 
     @Override
-    public List<CommandOption> getOptions() {
+    public List<OptionData> getOptions() {
         return List.of(
-                CommandOption.builder().optionType(OptionType.CHANNEL).name("channel").required(true).description("The channel to send the message in.").build(),
-                CommandOption.builder().optionType(OptionType.STRING).name("message").required(true).description("The message to send.").build(),
-                CommandOption.builder().optionType(OptionType.STRING).name("when").required(true).description("Set when this message should be sent: MM-DD-YYYY|HH:MM").build(),
-                CommandOption.builder().optionType(OptionType.STRING).name("frequency").required(true)
-                        .description("Set the frequency for this message to be repeated: NEVER, 10SEC, 1MIN, 1HR, 3DAY, 1WEEK, 2MONTH").build(),
-                CommandOption.builder().optionType(OptionType.STRING).name("id").required(false).description("The identifier of this scheduled message.").build()
+                new OptionData(OptionType.STRING, "message", "The message to send.").setRequired(true),
+                new OptionData(OptionType.STRING, "time", "Set when this message should be sent: HH:MM. IN 24 HOUR TIME!!! ").setRequired(true),
+                new OptionData(OptionType.CHANNEL, "channel", "The channel to send the message in.").setRequired(false),
+                new OptionData(OptionType.STRING, "date", "Set when this message should be sent: MM/DD/YYYY").setMaxLength(10).setRequired(false),
+                new OptionData(OptionType.STRING, "repeat", "Set the frequency for this message to be repeated").addChoices(Util.buildChoicesFromEnum(MessageFrequency.MessageFrequencyUnit.class)).setRequired(false),
+                new OptionData(OptionType.INTEGER, "interval", "Set the interval for this message to be repeated").setRequired(false),
+                new OptionData(OptionType.STRING, "id", "The identifier of this scheduled message.").setRequired(false)
         );
     }
 
@@ -76,16 +88,17 @@ public class ReminderModule extends Tickable implements CommandModule {
         for (WrappedReminder message : WRAPPED_REMINDERS) {
             if (!message.shouldSendNow()) {
                 continue;
+            } else if (!message.isValid()) {
+                WRAPPED_REMINDERS.remove(message);
+                continue;
             }
 
-            TextChannel channel = (TextChannel) message.getChannel();
-            channel.sendMessage(message.getMessage() + "\n-# (reminder id: " + message.getIdentifier() + ")").queue();
-            message.setLastSent(LocalDateTime.now());
-            FrameWorkLogger.info("Sent scheduled message in " + channel.getName() + " at " + LocalDateTime.now() + " with frequency " + message.getFrequency());
+            message.send();
+            FrameWorkLogger.info("Sent scheduled message in " + message.getChannel().getName() + " at " + LocalDateTime.now() + " with frequency " + message.getFrequency());
         }
 
         if (savesFile.getStringList(SAVE_REGION).size() != WRAPPED_REMINDERS.size()) {
-            savesFile.set(SAVE_REGION, WRAPPED_REMINDERS.stream().map(WrappedReminder::serialize).toList());
+            savesFile.set(SAVE_REGION, WRAPPED_REMINDERS.stream().map(serdes::serialize).toList());
             savesFile.save();
         }
     }

@@ -2,6 +2,7 @@ package dev.jsinco.discord.framework.commands;
 
 import dev.jsinco.discord.framework.AbstractModule;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.util.List;
 
@@ -9,7 +10,6 @@ import java.util.List;
  * Interface for command modules.
  * @see AbstractModule
  * @see CommandManager
- * @see CommandOption
  * @since 1.0
  * @author Jonah
  */
@@ -25,7 +25,7 @@ public interface CommandModule extends AbstractModule {
      * Get the options for this command.
      * @return The options for this command.
      */
-    default List<CommandOption> getOptions() {
+    default List<OptionData> getOptions() {
         return List.of();
     }
 

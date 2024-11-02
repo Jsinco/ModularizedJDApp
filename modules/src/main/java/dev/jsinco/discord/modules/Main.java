@@ -3,11 +3,12 @@ package dev.jsinco.discord.modules;
 import dev.jsinco.abstractjavafilelib.FileLibSettings;
 import dev.jsinco.discord.framework.AbstractModule;
 import dev.jsinco.discord.framework.FrameWork;
-import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.abstractjavafilelib.schemas.SnakeYamlConfig;
-import net.dv8tion.jda.api.JDA;
+import dev.jsinco.discord.framework.settings.Settings;
+import lombok.Getter;
 
 import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Main Modules class. Entry point for our app and calls our framework to
@@ -19,13 +20,28 @@ import java.io.File;
  */
 public class Main {
 
-    @InjectStatic(from = FrameWork.class)
-    private static JDA jda;
-    private static SnakeYamlConfig SAVES_FILE;
+    @Getter private static Settings settings;
+    @Getter private static SnakeYamlConfig savesFile;
 
 
     public static void main(String[] args) {
+        // Needs to be initialized before the framework starts
+
         // Optional custom data folder stuff. In the future, we can use more than just these simple flat files from my lib.
+        Path dataFolderPath = setupDataFolder();
+        System.out.println("Using " + dataFolderPath + " as data folder.");
+        savesFile = new SnakeYamlConfig("saves.yml");
+
+
+        // Start the framework
+        FrameWork.start(Main.class, dataFolderPath);
+
+        // Needs to be initialized after the framework starts
+        settings = FrameWork.getFileManager().getSettings();
+    }
+
+
+    private static Path setupDataFolder() {
         String newDataFolderPath = System.getProperty("dataFolder");
         if (newDataFolderPath == null) {
             newDataFolderPath = System.getenv("dataFolder");
@@ -33,17 +49,19 @@ public class Main {
 
         if (newDataFolderPath != null) {
             File newFolder = new File(newDataFolderPath);
-            if (newFolder.exists() && newFolder.isDirectory()) {
-                FileLibSettings.set(newFolder);
+
+            if (!newFolder.exists()) {
+                newFolder.mkdirs();
+                System.out.println("Created new data folder at " + newFolder.getPath());
+            }
+
+            if (!newFolder.isDirectory()) {
+                System.out.println("Provided data folder does is not a directory. Using default data folder.");
             } else {
-                System.out.println("Provided data folder does not exist or is not a directory. Using default data folder.");
+                FileLibSettings.set(newFolder);
             }
         }
-        System.out.println("Using " + FileLibSettings.getDataFolder().getPath() + " as data folder.");
-        SAVES_FILE = new SnakeYamlConfig("saves.yml"); // Init our main persistent data file.
-
-        // Start the framework
-        FrameWork.start(Main.class);
+        return FileLibSettings.getDataFolder().toPath();
     }
 
 }

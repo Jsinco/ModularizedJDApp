@@ -1,11 +1,10 @@
 package dev.jsinco.discord.modules.reminders;
 
-import dev.jsinco.discord.framework.util.ConfigurationSerializable;
-import dev.jsinco.discord.modules.Util;
+import dev.jsinco.discord.modules.util.Util;
 import lombok.Getter;
 
 @Getter
-public class MessageFrequency implements ConfigurationSerializable {
+public class MessageFrequency {
 
     private int number;
     private MessageFrequencyUnit unit;
@@ -42,16 +41,12 @@ public class MessageFrequency implements ConfigurationSerializable {
 
     @Override
     public String toString() {
-        return number + unit.name();
+        return number + ";" + unit.name();
     }
 
-    @Override
-    public String serialize() {
-        return number + "|" + unit.name();
-    }
 
-    public static MessageFrequency deserialize(String serialized) {
-        String[] split = serialized.split("\\|");
+    public static MessageFrequency fromString(String string) {
+        String[] split = string.split(";");
         return new MessageFrequency(Integer.parseInt(split[0]), Util.getEnumByName(MessageFrequencyUnit.class, split[1]));
     }
 
