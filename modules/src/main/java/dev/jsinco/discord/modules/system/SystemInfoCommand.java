@@ -1,9 +1,13 @@
-package dev.jsinco.discord.modules.info;
+package dev.jsinco.discord.modules.system;
 
 import dev.jsinco.discord.framework.commands.CommandModule;
 import dev.jsinco.discord.framework.commands.DiscordCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
+/**
+ * A command module for showing information about the system JDA is running on.
+ * @author Jonah
+ */
 public class SystemInfoCommand implements CommandModule {
 
     @DiscordCommand(name = "system", description = "Displays system information")

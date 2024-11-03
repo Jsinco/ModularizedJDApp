@@ -13,7 +13,7 @@ public class DumpJDAInfoCommand implements ConsoleCommand {
 
     @Override
     public void execute(String[] args) {
-        JDA jda = FrameWork.getDiscordApp();
+        JDA jda = FrameWork.getJda();
 
         FrameWorkLogger.info("JDA Info:");
         FrameWorkLogger.info("  - Status: " + jda.getStatus());

@@ -10,26 +10,24 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import org.jetbrains.annotations.Nullable;
 
-import java.awt.Color;
 import java.util.List;
 
 @DiscordCommand(name = "embed", description = "Create an embed", permission = Permission.MANAGE_CHANNEL)
 public class EmbedCreatorCommand implements CommandModule {
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        Pair<String, String> body = Util.parseTitle(Util.getOptionOrNull(event.getOption("body"), OptionType.STRING, "Should not be null"));
-        String color = Util.getOptionOrNull(event.getOption("color"), OptionType.STRING, "#FFAFAF");
-        String thumbnail = Util.getOptionOrNull(event.getOption("thumbnail"), OptionType.STRING);
+        Pair<String, String> body = Util.parseTitle(Util.getOption(event.getOption("body"), OptionType.STRING, "Should not be null"));
+        String color = Util.getOption(event.getOption("color"), OptionType.STRING, "#FFAFAF");
+        String thumbnail = Util.getOption(event.getOption("thumbnail"), OptionType.STRING);
 
-        String[] fields = new String[] {Util.getOptionOrNull(event.getOption("field_1"), OptionType.STRING),
-                Util.getOptionOrNull(event.getOption("field_2"), OptionType.STRING),
-                Util.getOptionOrNull(event.getOption("field_3"), OptionType.STRING)};
+        String[] fields = new String[] {Util.getOption(event.getOption("field_1"), OptionType.STRING),
+                Util.getOption(event.getOption("field_2"), OptionType.STRING),
+                Util.getOption(event.getOption("field_3"), OptionType.STRING)};
 
-        String image = Util.getOptionOrNull(event.getOption("image"), OptionType.STRING);
-        String footer = Util.getOptionOrNull(event.getOption("footer"), OptionType.STRING);
-        TextChannel channel = Util.getOptionOrNull(event.getOption("channel"), OptionType.CHANNEL, event.getChannel()).asTextChannel();
+        String image = Util.getOption(event.getOption("image"), OptionType.STRING);
+        String footer = Util.getOption(event.getOption("footer"), OptionType.STRING);
+        TextChannel channel = Util.getOption(event.getOption("channel"), OptionType.CHANNEL, event.getChannel()).asTextChannel();
 
         EmbedBuilder embedBuilder = new EmbedBuilder().setAuthor(event.getUser().getName(), null, event.getUser().getAvatarUrl());
 

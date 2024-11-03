@@ -4,7 +4,6 @@ import dev.jsinco.discord.framework.serdes.TypeAdapter;
 import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.util.Pair;
-import dev.jsinco.discord.modules.embeds.EmbedCreatorCommand;
 import dev.jsinco.discord.modules.util.Util;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +17,14 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import java.awt.Color;
 import java.time.LocalDateTime;
 
+/**
+ * Encapsulation for a reminder.
+ * @see MessageFrequency
+ * @see ReminderDeleteCommand
+ * @see ReminderModule
+ * @see WrappedReminderTypeAdapter
+ * @author Jonah
+ */
 @TypeAdapter(WrappedReminderTypeAdapter.class) // Custom TypeAdapter for GSON
 @AllArgsConstructor @Builder @Getter @Setter // lombok stuff
 public class WrappedReminder {
@@ -36,7 +43,7 @@ public class WrappedReminder {
 
 
     public boolean isValid() {
-        if (frequency.getUnit() == MessageFrequency.MessageFrequencyUnit.NEVER || frequency.getNumber() <= 0) {
+        if ((frequency.getUnit() == MessageFrequency.MessageFrequencyUnit.NEVER && lastSent != null) || frequency.getNumber() <= 0) {
             return false;
         }
         return true;

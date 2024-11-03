@@ -17,8 +17,8 @@ import java.util.List;
 public class EmbedJsonCommand implements CommandModule {
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        String jsonString = Util.getOptionOrNull(event.getOption("json"), OptionType.STRING, "Should not be null");
-        TextChannel channel = Util.getOptionOrNull(event.getOption("channel"), OptionType.CHANNEL, event.getChannel()).asTextChannel();
+        String jsonString = Util.getOption(event.getOption("json"), OptionType.STRING, "Should not be null");
+        TextChannel channel = Util.getOption(event.getOption("channel"), OptionType.CHANNEL, event.getChannel()).asTextChannel();
 
         DataObject json = DataObject.fromJson(jsonString); // load the json data
         channel.sendMessageEmbeds(EmbedBuilder.fromData(json).setAuthor(event.getUser().getName(), null, event.getUser().getAvatarUrl()).build()).queue();

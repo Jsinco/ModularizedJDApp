@@ -13,6 +13,7 @@ import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.reflect.ReflectionUtil;
 import dev.jsinco.discord.framework.scheduling.Tickable;
 import dev.jsinco.discord.framework.settings.FrameWorkFileManager;
+import dev.jsinco.discord.framework.util.AbstainRegistration;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -36,7 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public final class FrameWork {
 
-    @Getter private static JDA discordApp;
+    @Getter private static JDA jda;
     @Getter private static Timer timer;
     @Getter private static Class<?> caller;
     @Getter private static FrameWorkFileManager fileManager;
@@ -64,7 +65,7 @@ public final class FrameWork {
         timer = new Timer(caller.getSimpleName().toLowerCase() + "-scheduler");
         fileManager = new FrameWorkFileManager(dataFolderPath);
 
-        discordApp = JDABuilder.createDefault(botToken)
+        jda = JDABuilder.createDefault(botToken)
                 .enableIntents(GatewayIntent.GUILD_MESSAGES,
                         GatewayIntent.MESSAGE_CONTENT,
                         GatewayIntent.GUILD_MEMBERS)
@@ -73,10 +74,10 @@ public final class FrameWork {
                 .setAutoReconnect(true).build();
 
         try {
-            discordApp.awaitReady();
+            jda.awaitReady();
             FrameWorkLogger.info("JDA ready!");
         } catch (InterruptedException e) {
-            FrameWorkLogger.error("An error occurred while waiting for the JDA to be ready!", e);
+            FrameWorkLogger.error("An error occurred while waiting for JDA to be ready!", e);
         }
 
 
@@ -84,11 +85,18 @@ public final class FrameWork {
         injectStaticFields();
 
         // Using annotations is so much better
-        discordApp.setEventManager(new AnnotatedEventManager());
+        jda.setEventManager(new AnnotatedEventManager());
         reflectivelyRegisterClasses();
 
+        CommandManager commandManager = new CommandManager();
+        jda.addEventListener(commandManager); // Manually add this event listener
+        timer.schedule(commandManager, 0L, 10000L); // 10 Sec
 
-        discordApp.addEventListener(new CommandManager()); // Manually add this event listener
+        // Update commands on startup
+//        jda.updateCommands().queue();
+//        for (Guild guild : jda.getGuilds()) {
+//            guild.updateCommands().queue();
+//        }
 
         // Console commands
         ConsoleCommandManager.getInstance()
@@ -104,32 +112,38 @@ public final class FrameWork {
     public static void reflectivelyRegisterClasses() {
         Set<Class<?>> classes = ReflectionUtil.getAllClassesFor(ListenerModule.class, CommandModule.class, Tickable.class);
 
-        int skipped = 0;
         for (Class<?> aClass : classes) {
 
             try {
                 Object instance = aClass.getDeclaredConstructor().newInstance();
                 if (instance instanceof ListenerModule listenerModule) {
-                    listenerModule.register();
-                    FrameWorkLogger.info("Registered listener module! (" + listenerModule.getClass().getSimpleName() + ")");
+                    if (aClass.isAnnotationPresent(AbstainRegistration.class)) {
+                        listenerModule.registerInactive();
+                    } else {
+                        FrameWorkLogger.info("Registering listener module (" + listenerModule.getClass().getSimpleName() + ")");
+                        listenerModule.register();
+                    }
                 }
+
+                if (aClass.isAnnotationPresent(AbstainRegistration.class)) {
+                    continue;
+                }
+
                 if (instance instanceof CommandModule commandModule) {
+                    FrameWorkLogger.info("Registering command module (" + commandModule.getClass().getSimpleName() + ")");
                     commandModule.register();
-                    FrameWorkLogger.info("Registered command module! (" + commandModule.getClass().getSimpleName() + ")");
                 }
                 if (instance instanceof Tickable timerTickable) {
+                    FrameWorkLogger.info("Registering timer tickable (" + timerTickable.getClass().getSimpleName() + ")");
                     timer.schedule(timerTickable, timerTickable.getDelay(), timerTickable.getPeriod());
-                    FrameWorkLogger.info("Registered timer tickable! (" + timerTickable.getClass().getSimpleName() + ")");
                 }
             } catch (NoSuchMethodException ignored) {
                 // If the class doesn't have a no-args constructor, the developer has to register it manually
-                skipped++;
             } catch (Exception e) {
-                skipped++;
                 FrameWorkLogger.error("An error occurred while registering a class reflectively: " + aClass.getCanonicalName(), e);
             }
         }
-        FrameWorkLogger.info("Finished registering classes/modules reflectively! Skipped " + skipped + " classes.");
+        FrameWorkLogger.info("Finished registering classes/modules reflectively!");
     }
 
 

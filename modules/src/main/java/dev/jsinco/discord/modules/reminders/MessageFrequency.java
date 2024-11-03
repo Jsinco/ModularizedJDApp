@@ -3,6 +3,14 @@ package dev.jsinco.discord.modules.reminders;
 import dev.jsinco.discord.modules.util.Util;
 import lombok.Getter;
 
+/**
+ * Encapsulation for how frequent a wrapped message should be sent.
+ * @see ReminderModule
+ * @see ReminderDeleteCommand
+ * @see WrappedReminder
+ * @see WrappedReminderTypeAdapter
+ * @author Jonah
+ */
 @Getter
 public class MessageFrequency {
 
@@ -29,16 +37,6 @@ public class MessageFrequency {
         }
     }
 
-    public enum MessageFrequencyUnit {
-        NEVER,
-        MIN,
-        HR,
-        DAY,
-        WEEK,
-        MONTH,
-        YEAR
-    }
-
     @Override
     public String toString() {
         return number + ";" + unit.name();
@@ -50,4 +48,14 @@ public class MessageFrequency {
         return new MessageFrequency(Integer.parseInt(split[0]), Util.getEnumByName(MessageFrequencyUnit.class, split[1]));
     }
 
+
+    public enum MessageFrequencyUnit {
+        NEVER,
+        MIN,
+        HR,
+        DAY,
+        WEEK,
+        MONTH,
+        YEAR
+    }
 }

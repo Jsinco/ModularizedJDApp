@@ -13,7 +13,7 @@ public class StopCommand implements ConsoleCommand {
     @Override
     public void execute(String[] args) {
         FrameWorkLogger.info("Stopping!");
-        FrameWork.getDiscordApp().shutdownNow();
+        FrameWork.getJda().shutdownNow();
         System.exit(0);
     }
 }

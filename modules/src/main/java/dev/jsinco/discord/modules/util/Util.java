@@ -11,8 +11,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
+
+// TODO: Organize and separate into multiple UTIL classes
 public final class Util {
+
+    // Enum
 
     @Nullable
     public static <E extends Enum<E>> E getEnumByName(Class<E> enumClass, String name) {
@@ -22,6 +28,25 @@ public final class Util {
             return null;
         }
     }
+
+    public static <E extends Enum<E>> List<Command.Choice> buildChoicesFromEnum(Class<E> enumClass) {
+        return buildChoicesFromEnum(enumClass, new String[0]);
+    }
+
+    public static <E extends Enum<E>> List<Command.Choice> buildChoicesFromEnum(Class<E> enumClass, String... ignore) {
+        List<String> ignoreList = List.of(ignore);
+        return Stream.of(enumClass.getEnumConstants())
+                .map(it -> {
+                    if (ignoreList.contains(it.name())) {
+                        return null;
+                    }
+                    return new Command.Choice(it.name().toLowerCase(), it.name());
+                })
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    // String parsing
 
     public static LocalDateTime parseDateTime(String dateTime) {
         String[] parts = dateTime.split("T");
@@ -55,53 +80,6 @@ public final class Util {
         return LocalDateTime.of(localDate, localTime);
     }
 
-    public static <E extends Enum<E>> List<Command.Choice> buildChoicesFromEnum(Class<E> enumClass) {
-        return List.of(enumClass.getEnumConstants()).stream().map(it -> new Command.Choice(it.name().toLowerCase(), it.name())).toList();
-    }
-
-    @Nullable
-    public static <T> T getOptionOrNull(OptionMapping optionMapping, OptionType optionType) {
-        return getOptionOrNull(optionMapping, optionType, null);
-    }
-
-    public static <T> T getOptionOrNull(OptionMapping optionMapping, OptionType optionType, @Nullable T defaultValue) {
-        if (optionMapping == null) return defaultValue;
-
-        return switch (optionType) {
-            case UNKNOWN, SUB_COMMAND, SUB_COMMAND_GROUP -> defaultValue;
-            case STRING -> (T) optionMapping.getAsString();
-            case INTEGER -> (T) Integer.valueOf(optionMapping.getAsInt());
-            case BOOLEAN -> (T) Boolean.valueOf(optionMapping.getAsBoolean());
-            case CHANNEL -> (T) optionMapping.getAsChannel();
-            case ROLE -> (T) optionMapping.getAsRole();
-            case MENTIONABLE -> (T) optionMapping.getAsMentionable();
-            case ATTACHMENT -> (T) optionMapping.getAsAttachment();
-            case USER -> {
-                try {
-                    yield (T) optionMapping.getAsMember();
-                } catch (IllegalStateException e) {
-                    yield (T) optionMapping.getAsUser();
-                }
-            }
-            case NUMBER -> {
-                try {
-                    yield (T) Double.valueOf(optionMapping.getAsDouble());
-                } catch (IllegalStateException e) {
-                    yield (T) Long.valueOf(optionMapping.getAsLong());
-                }
-            }
-        };
-    }
-
-
-    public static Color hex(String hex) {
-        return new Color(
-                Integer.valueOf(hex.substring(1, 3), 16),
-                Integer.valueOf(hex.substring(3, 5), 16),
-                Integer.valueOf(hex.substring(5, 7), 16)
-        );
-    }
-
     public static Pair<String, String> parseTitle(@Nullable String string) {
         return parseTitle(string, null);
     }
@@ -129,5 +107,49 @@ public final class Util {
             firstThree.append(words[i]);
         }
         return firstThree.toString();
+    }
+
+    public static Color hex(String hex) {
+        return new Color(
+                Integer.valueOf(hex.substring(1, 3), 16),
+                Integer.valueOf(hex.substring(3, 5), 16),
+                Integer.valueOf(hex.substring(5, 7), 16)
+        );
+    }
+
+    // OptionMappings
+
+    @Nullable
+    public static <T> T getOption(OptionMapping optionMapping, OptionType optionType) {
+        return getOption(optionMapping, optionType, null);
+    }
+
+    public static <T> T getOption(OptionMapping optionMapping, OptionType optionType, @Nullable T defaultValue) {
+        if (optionMapping == null) return defaultValue;
+
+        return switch (optionType) {
+            case UNKNOWN, SUB_COMMAND, SUB_COMMAND_GROUP -> defaultValue;
+            case STRING -> (T) optionMapping.getAsString();
+            case INTEGER -> (T) Integer.valueOf(optionMapping.getAsInt());
+            case BOOLEAN -> (T) Boolean.valueOf(optionMapping.getAsBoolean());
+            case CHANNEL -> (T) optionMapping.getAsChannel();
+            case ROLE -> (T) optionMapping.getAsRole();
+            case MENTIONABLE -> (T) optionMapping.getAsMentionable();
+            case ATTACHMENT -> (T) optionMapping.getAsAttachment();
+            case USER -> {
+                try {
+                    yield (T) optionMapping.getAsMember();
+                } catch (IllegalStateException e) {
+                    yield (T) optionMapping.getAsUser();
+                }
+            }
+            case NUMBER -> {
+                try {
+                    yield (T) Double.valueOf(optionMapping.getAsDouble());
+                } catch (IllegalStateException e) {
+                    yield (T) Long.valueOf(optionMapping.getAsLong());
+                }
+            }
+        };
     }
 }

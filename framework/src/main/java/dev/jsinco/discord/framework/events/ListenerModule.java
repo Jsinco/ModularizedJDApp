@@ -14,4 +14,12 @@ public interface ListenerModule extends AbstractModule {
     default void register() {
         EventManager.registerEvents(this);
     }
+
+    default void unregister() {
+        EventManager.unregisterEvents(this);
+    }
+
+    default void registerInactive() {
+        EventManager.registerInactiveEvent(this);
+    }
 }

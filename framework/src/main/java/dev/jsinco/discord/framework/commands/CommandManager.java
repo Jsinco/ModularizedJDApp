@@ -1,7 +1,10 @@
 package dev.jsinco.discord.framework.commands;
 
+import dev.jsinco.discord.framework.commands.embedded.AddEventListenerEmbeddedCommand;
+import dev.jsinco.discord.framework.commands.embedded.RemoveEventListenerEmbeddedCommand;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.FrameWork;
+import dev.jsinco.discord.framework.scheduling.Tickable;
 import dev.jsinco.discord.framework.settings.Settings;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -28,10 +31,16 @@ import java.util.Map;
  * @see CommandModule
  * @see DiscordCommand
  */
-public class CommandManager {
+public class CommandManager extends Tickable {
 
     private static final Map<String, CommandModule> COMMAND_MODULE_MAP = new HashMap<>();
     private final Settings settings = FrameWork.getFileManager().getSettings();
+
+    // For embedded commands in the framework which must be registered manually
+    public CommandManager() {
+        new AddEventListenerEmbeddedCommand().register();
+        new RemoveEventListenerEmbeddedCommand().register();
+    }
 
 
     public static CommandModule getCommand(String name) {
@@ -40,10 +49,11 @@ public class CommandManager {
 
 
     public static void registerCommand(CommandModule commandModule) {
-        JDA discordApp = FrameWork.getDiscordApp();
+        JDA discordApp = FrameWork.getJda();
 
         if (commandModule.getCommandInfo() == null) {
-            throw new IllegalArgumentException("CommandModule must have a DiscordCommand annotation!");
+            FrameWorkLogger.error("CommandModule must have a DiscordCommand annotation! Skipping registration for: " + commandModule.getClass().getName());
+            return;
         }
 
         if (commandModule.getCommandInfo().guildOnly()) {
@@ -58,7 +68,7 @@ public class CommandManager {
     }
 
     private static void upsertCommand(String name, String desc, List<OptionData> options, @Nullable Guild guild) {
-        JDA discordApp = FrameWork.getDiscordApp();
+        JDA discordApp = FrameWork.getJda();
         CommandCreateAction action = guild == null ? discordApp.upsertCommand(name, desc) : guild.upsertCommand(name, desc);
         action.addOptions(options);
         action.queue();
@@ -139,5 +149,15 @@ public class CommandManager {
             return settings.getRepository() + "blob/" + settings.getBranch() + "/framework/src/main/java/"  + element.getClassName().replace(".", "/") + ".java#L" + element.getLineNumber();
         }
         return settings.getRepository() + "blob/" + settings.getBranch() + "/" + settings.getModule() + "/" + element.getClassName().replace(".", "/") + ".java#L" + element.getLineNumber();
+    }
+
+    @Override
+    public void onTick() {
+        for (var command : COMMAND_MODULE_MAP.values()) {
+            if (command.persistRegistration()) {
+
+                registerCommand(command);
+            }
+        }
     }
 }

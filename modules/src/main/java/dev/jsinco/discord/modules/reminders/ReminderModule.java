@@ -11,7 +11,6 @@ import dev.jsinco.discord.framework.serdes.Serdes;
 import dev.jsinco.discord.framework.util.Module;
 import dev.jsinco.discord.modules.Main;
 import dev.jsinco.discord.modules.util.Util;
-import lombok.Getter;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -28,14 +27,21 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-@Tick(unit = TimeUnit.SECONDS, period = 30)
+/**
+ * Main module class for the reminder module.
+ * @see MessageFrequency
+ * @see ReminderDeleteCommand
+ * @see WrappedReminder
+ * @see WrappedReminderTypeAdapter
+ * @author Jonah
+ */
+@Tick(unit = TimeUnit.SECONDS, period = 5)
 @DiscordCommand(name = "reminder", permission = Permission.MANAGE_CHANNEL,
         description = "Schedule a message to be sent at a later time, or to be repeated at certain times.")
 public class ReminderModule extends Tickable implements Module {
 
-    @Getter
     private static final ConcurrentLinkedQueue<WrappedReminder> WRAPPED_REMINDERS = new ConcurrentLinkedQueue<>();
-    private static final String SAVE_REGION = "scheduledMessages";
+    private static final String SAVE_REGION = "reminders";
     @InjectStatic(value = Main.class)
     private static SnakeYamlConfig savesFile;
 
@@ -51,13 +57,13 @@ public class ReminderModule extends Tickable implements Module {
     @Override
     public void execute(SlashCommandInteractionEvent event) {
 
-        String message = Util.getOptionOrNull(event.getOption("message"), OptionType.STRING);
-        String time = Util.getOptionOrNull(event.getOption("time"), OptionType.STRING);
-        Channel channel = Util.getOptionOrNull(event.getOption("channel"), OptionType.CHANNEL, event.getChannel());
-        String date = Util.getOptionOrNull(event.getOption("date"), OptionType.STRING);
-        MessageFrequency.MessageFrequencyUnit repeat = Util.getEnumByName(MessageFrequency.MessageFrequencyUnit.class, Util.getOptionOrNull(event.getOption("repeat"), OptionType.STRING, "NEVER"));
-        int interval = Util.getOptionOrNull(event.getOption("interval"), OptionType.INTEGER, 1);
-        String identifier = Util.getOptionOrNull(event.getOption("id"), OptionType.STRING, "reminder #" + WRAPPED_REMINDERS.size());
+        String message = Util.getOption(event.getOption("message"), OptionType.STRING);
+        String time = Util.getOption(event.getOption("time"), OptionType.STRING);
+        Channel channel = Util.getOption(event.getOption("channel"), OptionType.CHANNEL, event.getChannel());
+        String date = Util.getOption(event.getOption("date"), OptionType.STRING);
+        MessageFrequency.MessageFrequencyUnit repeat = Util.getEnumByName(MessageFrequency.MessageFrequencyUnit.class, Util.getOption(event.getOption("repeat"), OptionType.STRING, "NEVER"));
+        int interval = Util.getOption(event.getOption("interval"), OptionType.INTEGER, 1);
+        String identifier = Util.getOption(event.getOption("id"), OptionType.STRING, "reminder #" + WRAPPED_REMINDERS.size());
 
         WrappedReminder wrappedReminder = new WrappedReminder.WrappedReminderBuilder()
                 .identifier(identifier)
@@ -123,6 +129,10 @@ public class ReminderModule extends Tickable implements Module {
 
         savesFile.set(SAVE_REGION, WRAPPED_REMINDERS.stream().map(serdes::serialize).toList());
         savesFile.save();
+    }
+
+    public static ConcurrentLinkedQueue<WrappedReminder> getWrappedReminders() {
+        return WRAPPED_REMINDERS;
     }
 }
 

@@ -29,6 +29,10 @@ public interface CommandModule extends AbstractModule {
         return List.of();
     }
 
+    default boolean persistRegistration() {
+        return false;
+    }
+
     default DiscordCommand getCommandInfo() {
         DiscordCommand annotation = getClass().getAnnotation(DiscordCommand.class);
         if (annotation == null) {

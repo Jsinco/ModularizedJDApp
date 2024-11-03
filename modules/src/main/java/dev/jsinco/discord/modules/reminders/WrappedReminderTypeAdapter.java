@@ -9,6 +9,14 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+/**
+ * A GSON (serdes) TypeAdapter for the WrappedReminder class
+ * @see MessageFrequency
+ * @see ReminderDeleteCommand
+ * @see WrappedReminder
+ * @see ReminderModule
+ * @author Jonah
+ */
 public class WrappedReminderTypeAdapter extends TypeAdapter<WrappedReminder> {
 
     @Override
@@ -40,7 +48,7 @@ public class WrappedReminderTypeAdapter extends TypeAdapter<WrappedReminder> {
                 case "identifier" ->
                     identifier = in.nextString();
                 case "channel" ->
-                    channel = (TextChannel) FrameWork.getDiscordApp().getGuildChannelById(in.nextString());
+                    channel = (TextChannel) FrameWork.getJda().getGuildChannelById(in.nextString());
                 case "message" ->
                     message = in.nextString();
                 case "frequency" ->
