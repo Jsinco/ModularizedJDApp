@@ -1,6 +1,5 @@
 package dev.jsinco.discord.modules.reminders;
 
-import dev.jsinco.abstractjavafilelib.schemas.SnakeYamlConfig;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.scheduling.TimeUnit;
 import dev.jsinco.discord.framework.scheduling.Tick;
@@ -9,7 +8,7 @@ import dev.jsinco.discord.framework.commands.DiscordCommand;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.serdes.Serdes;
 import dev.jsinco.discord.framework.util.Module;
-import dev.jsinco.discord.modules.Main;
+import dev.jsinco.discord.modules.data.ModuleData;
 import dev.jsinco.discord.modules.util.Util;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.Channel;
@@ -40,16 +39,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
         description = "Schedule a message to be sent at a later time, or to be repeated at certain times.")
 public class ReminderModule extends Tickable implements Module {
 
-    private static final ConcurrentLinkedQueue<WrappedReminder> WRAPPED_REMINDERS = new ConcurrentLinkedQueue<>();
-    private static final String SAVE_REGION = "reminders";
-    @InjectStatic(value = Main.class)
-    private static SnakeYamlConfig savesFile;
+    private static final ConcurrentLinkedQueue<WrappedReminder> wrappedReminders = new ConcurrentLinkedQueue<>();
+    @InjectStatic(ModuleData.class) private static ModuleData savesFile;
 
-    private final Serdes serdes = Serdes.getSingleton();
+    private final Serdes serdes = Serdes.getInstance();
 
     public ReminderModule() {
-        if (savesFile.contains(SAVE_REGION)) {
-            WRAPPED_REMINDERS.addAll(savesFile.getStringList(SAVE_REGION).stream().map(it -> serdes.deserialize(it, WrappedReminder.class)).toList());
+        if (!savesFile.getSerializedReminders().isEmpty()) {
+            wrappedReminders.addAll(savesFile.getSerializedReminders().stream().map(it -> serdes.deserialize(it, WrappedReminder.class)).toList());
         }
     }
 
@@ -63,7 +60,7 @@ public class ReminderModule extends Tickable implements Module {
         String date = Util.getOption(event.getOption("date"), OptionType.STRING);
         MessageFrequency.MessageFrequencyUnit repeat = Util.getEnumByName(MessageFrequency.MessageFrequencyUnit.class, Util.getOption(event.getOption("repeat"), OptionType.STRING, "NEVER"));
         int interval = Util.getOption(event.getOption("interval"), OptionType.INTEGER, 1);
-        String identifier = Util.getOption(event.getOption("id"), OptionType.STRING, "reminder #" + WRAPPED_REMINDERS.size());
+        String identifier = Util.getOption(event.getOption("id"), OptionType.STRING, "reminder #" + wrappedReminders.size());
 
         WrappedReminder wrappedReminder = new WrappedReminder.WrappedReminderBuilder()
                 .identifier(identifier)
@@ -72,7 +69,7 @@ public class ReminderModule extends Tickable implements Module {
                 .frequency(new MessageFrequency(interval, repeat))
                 .when(Util.parseDateTime(date, time))
                 .build();
-        WRAPPED_REMINDERS.add(wrappedReminder);
+        wrappedReminders.add(wrappedReminder);
 
         StringBuilder sb = new StringBuilder("Reminder Scheduled\n");
         sb.append("- Date: **" + wrappedReminder.getWhen().toLocalDate() + "**\n");
@@ -92,7 +89,7 @@ public class ReminderModule extends Tickable implements Module {
         if (!event.getComponentId().startsWith("remindermodule-remove;")) return;
 
         String identifier = event.getComponentId().split(";")[1];
-        WRAPPED_REMINDERS.removeIf(it -> it.getIdentifier().equals(identifier));
+        wrappedReminders.removeIf(it -> it.getIdentifier().equals(identifier));
         event.reply("Reminder removed. \n-# Id: " + identifier).queue();
     }
 
@@ -113,12 +110,12 @@ public class ReminderModule extends Tickable implements Module {
     
     @Override
     public void onTick() {
-        if (WRAPPED_REMINDERS.isEmpty()) return;
+        if (wrappedReminders.isEmpty()) return;
 
-        for (WrappedReminder message : WRAPPED_REMINDERS) {
+        for (WrappedReminder message : wrappedReminders) {
             if (!message.shouldSendNow()) {
                 if (!message.isValid()) {
-                    WRAPPED_REMINDERS.remove(message);
+                    wrappedReminders.remove(message);
                 }
                 continue;
             }
@@ -127,12 +124,8 @@ public class ReminderModule extends Tickable implements Module {
             FrameWorkLogger.info("Sent scheduled message in " + message.getChannel().getName() + " at " + LocalDateTime.now() + " with frequency " + message.getFrequency());
         }
 
-        savesFile.set(SAVE_REGION, WRAPPED_REMINDERS.stream().map(serdes::serialize).toList());
+        savesFile.setSerializedReminders(wrappedReminders.stream().map(serdes::serialize).toList());
         savesFile.save();
-    }
-
-    public static ConcurrentLinkedQueue<WrappedReminder> getWrappedReminders() {
-        return WRAPPED_REMINDERS;
     }
 }
 

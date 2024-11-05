@@ -34,7 +34,7 @@ import java.util.Map;
 public class CommandManager extends Tickable {
 
     private static final Map<String, CommandModule> COMMAND_MODULE_MAP = new HashMap<>();
-    private final Settings settings = FrameWork.getFileManager().getSettings();
+    private final Settings settings = Settings.getInstance();
 
     // For embedded commands in the framework which must be registered manually
     public CommandManager() {

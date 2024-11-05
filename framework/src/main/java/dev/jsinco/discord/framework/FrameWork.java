@@ -12,7 +12,6 @@ import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.reflect.ReflectionUtil;
 import dev.jsinco.discord.framework.scheduling.Tickable;
-import dev.jsinco.discord.framework.settings.FrameWorkFileManager;
 import dev.jsinco.discord.framework.util.AbstainRegistration;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
@@ -40,12 +39,13 @@ public final class FrameWork {
     @Getter private static JDA jda;
     @Getter private static Timer timer;
     @Getter private static Class<?> caller;
-    @Getter private static FrameWorkFileManager fileManager;
+    @Getter private static Path dataFolderPath;
 
     private static final int MINIMUM_BOT_TOKEN_LENGTH = 50; // According to google it's 59 characters long. But I'll just use 50.
 
     public static void start(Class<?> caller, Path dataFolderPath) {
         FrameWork.caller = caller;
+        FrameWork.dataFolderPath = dataFolderPath;
         System.out.println("Starting " + caller.getCanonicalName());
 
         String botToken = System.getProperty("botToken");
@@ -63,7 +63,6 @@ public final class FrameWork {
 
         botToken = botToken.replace(" ", "").trim();
         timer = new Timer(caller.getSimpleName().toLowerCase() + "-scheduler");
-        fileManager = new FrameWorkFileManager(dataFolderPath);
 
         jda = JDABuilder.createDefault(botToken)
                 .enableIntents(GatewayIntent.GUILD_MESSAGES,

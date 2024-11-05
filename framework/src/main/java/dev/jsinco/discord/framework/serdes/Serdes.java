@@ -14,7 +14,7 @@ import java.util.Set;
 @Getter
 public class Serdes {
 
-    private static Serdes singleton;
+    private static Serdes instance;
     private final Gson gson;
 
     private Serdes() {
@@ -38,11 +38,11 @@ public class Serdes {
         return gson.fromJson(json, schema);
     }
 
-    public static Serdes getSingleton() {
-        if (singleton == null) {
-            singleton = new Serdes();
+    public static Serdes getInstance() {
+        if (instance == null) {
+            instance = new Serdes();
         }
-        return singleton;
+        return instance;
     }
 
     private static Map<Class<?>, Object> getTypeAdapters() {

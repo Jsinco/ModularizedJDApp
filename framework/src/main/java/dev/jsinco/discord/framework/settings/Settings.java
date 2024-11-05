@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public final class Settings extends OkaeriConfig {
+public final class Settings extends OkaeriYamlConfig<Settings> {
 
     @CustomKey("enhanced-errors.sendErrors")
     @Comment("Send errors to users if a command throws an exception.")
@@ -25,4 +25,10 @@ public final class Settings extends OkaeriConfig {
     @CustomKey("enhanced-errors.module")
     @Comment("The module path.")
     public String module = "modules/src/main/java";
+
+    @Getter
+    private static Settings instance = new Settings();
+    private Settings() {
+        super(Settings.class, "settings.yml");
+    }
 }
