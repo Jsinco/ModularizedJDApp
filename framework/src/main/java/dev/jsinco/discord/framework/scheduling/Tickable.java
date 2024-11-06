@@ -16,8 +16,8 @@ public abstract class Tickable extends TimerTask {
         if (annotation == null) {
             try {
                 annotation = getClass().getMethod("onTick").getAnnotation(Tick.class);
-            } catch (NoSuchMethodException ignored) {
-                FrameWorkLogger.error("Unable to find @Tick annotation on class or method! All tickables should have a @Tick annotation!", ignored);
+            } catch (NoSuchMethodException e) {
+                FrameWorkLogger.error("Unable to find @Tick annotation on class or method! Tickables should have an @Tick annotation or use args supported constructor.", e);
             }
         }
         TimeUnit unit = annotation != null ? annotation.unit() : TimeUnit.MILLISECONDS;
@@ -25,6 +25,11 @@ public abstract class Tickable extends TimerTask {
 
         this.delay = annotation != null ? unit.toMillis(annotation.delay()) : 0L;
         this.period = annotation != null ? unit.toMillis(annotation.period()) : 1000L;
+    }
+
+    public Tickable(TimeUnit unit, long delay, long period) {
+        this.delay = unit.toMillis(delay);
+        this.period = unit.toMillis(period);
     }
 
     // Just renaming the method to onTick

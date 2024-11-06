@@ -1,4 +1,4 @@
-package dev.jsinco.discord.modules.moduleimpl.canvas.moduleabstract;
+package dev.jsinco.discord.modules.moduleimpl.canvas.moduleabstract.interfaces;
 
 import dev.jsinco.discord.framework.commands.CommandManager;
 import dev.jsinco.discord.framework.commands.CommandModule;
@@ -28,14 +28,14 @@ public interface CanvasCommandModule extends CommandModule {
     @Override
     default void execute(SlashCommandInteractionEvent event) throws Exception {
         DiscordCanvasUser user = DiscordCanvasUser.from(event.getUser());
+        boolean ephemeral = Util.getOption(event.getOption("ephemeral"), OptionType.BOOLEAN, true);
         if (user == null) {
             EmbedBuilder embedBuilder = Institution.UNKNOWN_INSTITUTION.getEmbed();
             embedBuilder.setTitle("Unlinked Canvas Account");
             embedBuilder.setDescription("You need to link your Canvas account to use this command!");
-            event.replyEmbeds(embedBuilder.build()).addFiles(Institution.UNKNOWN_INSTITUTION.getCanvasLogoFileUpload()).queue();
+            event.replyEmbeds(embedBuilder.build()).addFiles(Institution.UNKNOWN_INSTITUTION.getCanvasLogoFileUpload()).setEphemeral(ephemeral).queue();
             return;
         }
-        boolean ephemeral = Util.getOption(event.getOption("ephemeral"), OptionType.BOOLEAN, true);
 
         // Handle Canvas commands in a separate thread to prevent blocking the main thread
         Thread thread = new Thread(() -> {

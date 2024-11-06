@@ -51,6 +51,6 @@ public class DiscordCanvasUser {
 
     @Nullable
     public static DiscordCanvasUser from(User user) {
-        return DiscordCanvasUserManager.getLinkedAccount(user.getId());
+        return DiscordCanvasUserManager.getInstance().getLinkedAccount(user.getId());
     }
 }

@@ -127,6 +127,10 @@ public final class Util {
         return str;
     }
 
+    public static String removeUselessIndents(String message) {
+        return message.replaceAll("\n\\s+", "");
+    }
+
     // OptionMappings
 
     @Nullable

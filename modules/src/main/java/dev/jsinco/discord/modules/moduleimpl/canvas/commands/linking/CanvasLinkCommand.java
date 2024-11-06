@@ -24,11 +24,12 @@ public class CanvasLinkCommand implements CommandModule {
             return;
         }
 
-        DiscordCanvasUserManager.createLinkedAccount(event.getUser().getId(), token, institution);
+        DiscordCanvasUserManager.getInstance().createLinkedAccount(event.getUser().getId(), token, institution);
         event.replyEmbeds(institution.getEmbed()
                 .setTitle("Canvas Account Linked")
                 .addField("Institution", institution.getProperName(), true)
                 .addField("Discord User", event.getUser().getName(), true)
+                .setFooter("You may only have one Canvas account linked at a time. Running this command again will overwrite your current link.")
                 .build()
         ).addFiles(institution.getCanvasLogoFileUpload()).setEphemeral(ephemeral).queue();
     }

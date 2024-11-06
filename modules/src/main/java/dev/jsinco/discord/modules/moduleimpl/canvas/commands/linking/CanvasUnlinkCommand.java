@@ -24,7 +24,7 @@ public class CanvasUnlinkCommand implements CommandModule {
 
         if (user != null) {
             institution = user.getInstitution();
-            DiscordCanvasUserManager.removeLinkedAccount(user.getDiscordId());
+            DiscordCanvasUserManager.getInstance().removeLinkedAccount(user.getDiscordId());
         }
 
         EmbedBuilder embedBuilder = institution.getEmbed();

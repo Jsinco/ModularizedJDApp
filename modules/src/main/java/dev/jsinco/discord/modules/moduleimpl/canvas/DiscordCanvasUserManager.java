@@ -7,18 +7,22 @@ import dev.jsinco.discord.framework.shutdown.ShutdownSavable;
 import dev.jsinco.discord.modules.cryptography.AESEncrypt;
 import dev.jsinco.discord.modules.files.ModuleData;
 import dev.jsinco.discord.modules.util.Util;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class DiscordCanvasUserManager implements ShutdownSavable {
 
-    private static final List<DiscordCanvasUser> loadedDiscordCanvasUsers = new ArrayList<>();
     @InjectStatic(ModuleData.class)
     private static ModuleData moduleData;
 
-    public DiscordCanvasUserManager() {
+    private static DiscordCanvasUserManager instance;
+    private final List<DiscordCanvasUser> loadedDiscordCanvasUsers = new ArrayList<>();
+
+    private DiscordCanvasUserManager() {
         String encryptKey = Util.getFromEnvironment("encrypt_key");
         if (encryptKey != null) {
             AESEncrypt aesEncrypt = new AESEncrypt(encryptKey);
@@ -47,25 +51,25 @@ public class DiscordCanvasUserManager implements ShutdownSavable {
     }
 
 
-    public static void createLinkedAccount(String discordId, String canvasKey, Institution institution) {
+    public void createLinkedAccount(String discordId, String canvasKey, Institution institution) {
         loadedDiscordCanvasUsers.add(new DiscordCanvasUser(discordId, canvasKey, institution));
         serializeAndSave();
     }
 
-    public static void removeLinkedAccount(String discordId) {
+    public void removeLinkedAccount(String discordId) {
         loadedDiscordCanvasUsers.removeIf(user -> user.getDiscordId().equals(discordId));
         serializeAndSave();
     }
 
     @Nullable
-    public static DiscordCanvasUser getLinkedAccount(String discordId) {
+    public DiscordCanvasUser getLinkedAccount(String discordId) {
         return loadedDiscordCanvasUsers.stream()
                 .filter(user -> user.getDiscordId().equals(discordId))
                 .findFirst()
                 .orElse(null);
     }
 
-    public static void serializeAndSave() {
+    public void serializeAndSave() {
         Serdes serdes = Serdes.getInstance();
         AESEncrypt aesEncrypt = new AESEncrypt(Util.getFromEnvironment("encrypt_key"));
         List<String> encryptedUsers = new ArrayList<>();
@@ -79,6 +83,13 @@ public class DiscordCanvasUserManager implements ShutdownSavable {
         }
         moduleData.setEncryptedCanvasUsers(encryptedUsers);
         moduleData.save();
+    }
+
+    public static DiscordCanvasUserManager getInstance() {
+        if (instance == null) {
+            instance = new DiscordCanvasUserManager();
+        }
+        return instance;
     }
 
 }

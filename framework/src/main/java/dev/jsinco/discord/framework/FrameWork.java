@@ -16,6 +16,7 @@ import dev.jsinco.discord.framework.settings.Settings;
 import dev.jsinco.discord.framework.shutdown.ShutdownManager;
 import dev.jsinco.discord.framework.shutdown.ShutdownSavable;
 import dev.jsinco.discord.framework.util.AbstainRegistration;
+import dev.jsinco.discord.framework.util.AutoInstantiated;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -30,9 +31,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * The main class for the framework. Creates our JDA instance and registers all commands and events.
@@ -125,10 +128,10 @@ public final class FrameWork {
     }
 
     public static void reflectivelyRegisterClasses() {
-        Set<Class<?>> classes = ReflectionUtil.getAllClassesFor(ListenerModule.class, CommandModule.class, Tickable.class, ShutdownSavable.class);
+        Set<Class<?>> classes = ReflectionUtil.getAllClassesFor(ListenerModule.class, CommandModule.class, Tickable.class, ShutdownSavable.class, AutoInstantiated.class);
 
         for (Class<?> aClass : classes) {
-            if (aClass.isInterface() || Modifier.isAbstract(aClass.getModifiers())) {
+            if (aClass.isInterface()) {
                 continue;
             }
 
@@ -162,6 +165,10 @@ public final class FrameWork {
                     ShutdownSavable shutdownSavable = (ShutdownSavable) instance;
                     FrameWorkLogger.info("Registering shutdown savable (" + shutdownSavable.getClass().getSimpleName() + ")");
                     ShutdownManager.registerSavable(shutdownSavable);
+                }
+                if (AutoInstantiated.class.isAssignableFrom(aClass)) {
+                    ((AutoInstantiated) instance).onInstantiation();
+                    FrameWorkLogger.info("Auto-instantiated class: " + aClass.getCanonicalName());
                 }
             } catch (NoSuchMethodException ignored) {
                 // If the class doesn't have a no-args constructor, the developer has to register it manually
@@ -208,5 +215,12 @@ public final class FrameWork {
         }
     }
 
+    public static <T> T registerTickable(T tickable) {
+        if (Tickable.class.isAssignableFrom(tickable.getClass())) {
+            Tickable tickable1 = (Tickable) tickable;
+            timer.schedule(tickable1, tickable1.getDelay(), tickable1.getPeriod());
+        }
+        return tickable;
+    }
 
 }

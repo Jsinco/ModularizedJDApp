@@ -11,7 +11,8 @@ repositories {
 
 dependencies {
     implementation(project(":framework"))
-    implementation("com.github.kstateome:canvas-api:2.0.0") // Canvas integration
+    implementation("com.github.Jsinco:canvas-api:2.0.2") // Canvas integration
+    implementation("io.github.furstenheim:copy_down:1.0") // HTML to markdown
 }
 
 tasks {

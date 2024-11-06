@@ -5,6 +5,7 @@ import dev.jsinco.discord.modules.util.ImageUtil;
 import dev.jsinco.discord.modules.util.Util;
 import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.Nullable;
 
@@ -107,6 +108,7 @@ public enum Institution {
     public EmbedBuilder getEmbed() {
         return new EmbedBuilder()
                 .setColor(color)
+                .setThumbnail(getCanvasLogoUrl())
                 .setAuthor("Canvas LMS For " + abbreviatedName, url, getCanvasLogoUrl());
     }
 }
