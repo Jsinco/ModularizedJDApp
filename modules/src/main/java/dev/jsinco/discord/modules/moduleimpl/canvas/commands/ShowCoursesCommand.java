@@ -4,6 +4,7 @@ import dev.jsinco.discord.framework.commands.DiscordCommand;
 import dev.jsinco.discord.modules.moduleimpl.canvas.CanvasFactoryManager;
 import dev.jsinco.discord.modules.moduleimpl.canvas.DiscordCanvasUser;
 import dev.jsinco.discord.modules.moduleimpl.canvas.Institution;
+import dev.jsinco.discord.modules.moduleimpl.canvas.moduleabstract.CanvasCommandModule;
 import edu.ksu.canvas.CanvasApiFactory;
 import edu.ksu.canvas.interfaces.CourseReader;
 import edu.ksu.canvas.model.Course;

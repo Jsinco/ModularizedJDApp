@@ -1,12 +1,17 @@
-package dev.jsinco.discord.modules.moduleimpl.canvas.commands;
+package dev.jsinco.discord.modules.moduleimpl.canvas.commands.linking;
 
 import dev.jsinco.discord.framework.commands.CommandModule;
 import dev.jsinco.discord.framework.commands.DiscordCommand;
 import dev.jsinco.discord.modules.moduleimpl.canvas.DiscordCanvasUser;
 import dev.jsinco.discord.modules.moduleimpl.canvas.DiscordCanvasUserManager;
 import dev.jsinco.discord.modules.moduleimpl.canvas.Institution;
+import dev.jsinco.discord.modules.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+
+import java.util.List;
 
 @DiscordCommand(name = "canvas-unlink", description = "Unlink your canvas account")
 public class CanvasUnlinkCommand implements CommandModule {
@@ -14,6 +19,7 @@ public class CanvasUnlinkCommand implements CommandModule {
     public void execute(SlashCommandInteractionEvent event) throws Exception {
         DiscordCanvasUser user = DiscordCanvasUser.from(event.getUser());
         Institution institution = Institution.UNKNOWN_INSTITUTION;
+        boolean ephemeral = Util.getOption(event.getOption("ephemeral"), OptionType.BOOLEAN, false);
 
 
         if (user != null) {
@@ -30,6 +36,13 @@ public class CanvasUnlinkCommand implements CommandModule {
             embedBuilder.setTitle("No Canvas Account Linked");
             embedBuilder.setDescription("You do not have a linked Canvas account.");
         }
-        event.replyEmbeds(embedBuilder.build()).addFiles(institution.getCanvasLogoFileUpload()).queue();
+        event.replyEmbeds(embedBuilder.build()).addFiles(institution.getCanvasLogoFileUpload()).setEphemeral(ephemeral).queue();
+    }
+
+    @Override
+    public List<OptionData> getOptions() {
+        return List.of(
+                new OptionData(OptionType.BOOLEAN, "ephemeral", "Should the response be ephemeral? (Non-visible to others)", false)
+        );
     }
 }

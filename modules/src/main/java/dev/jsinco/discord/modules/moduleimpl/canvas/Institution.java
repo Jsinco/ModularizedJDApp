@@ -26,13 +26,14 @@ public enum Institution {
             "https://usflearn.instructure.com",
             "University of South Florida",
             "USF",
-            Color.GREEN // Too lazy to go color pick USF's color
+            "#016948"
     ),
     UNKNOWN_INSTITUTION(
-            "https://canvas.instructure.com",
-            "Unknown Institution",
-            "Unknown-Institution",
-            Color.GRAY
+            "https://canvas.instructure.com", // Must be a valid instructure URL (obviously)
+            "Unknown Institution", // The institution's proper name
+            "Unknown-Institution", // The institution's abbreviated name
+            Color.GRAY // A color to represent the institution
+            // Any known restrictions for this institution's Canvas API (student accounts)
     )
     ;
 
@@ -42,7 +43,7 @@ public enum Institution {
     private final Color color;
     private final KnownRestriction[] knownRestrictions;
 
-    private BufferedImage canvasLogo;
+    private final BufferedImage canvasLogo;
 
     Institution(String url, String properName, String abbreviatedName, KnownRestriction... knownRestrictions) {
         this.url = url;

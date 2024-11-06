@@ -1,4 +1,4 @@
-package dev.jsinco.discord.modules.moduleimpl.canvas.commands;
+package dev.jsinco.discord.modules.moduleimpl.canvas.moduleabstract;
 
 import dev.jsinco.discord.framework.commands.CommandManager;
 import dev.jsinco.discord.framework.commands.CommandModule;
@@ -71,9 +71,8 @@ public interface CanvasCommandModule extends CommandModule {
 
     @Override
     default List<OptionData> getOptions() {
-        List<OptionData> options = new ArrayList<>();
-        options.add(new OptionData(OptionType.BOOLEAN, "ephemeral", "Should the response be ephemeral? (Non-visible to others)", true));
-        options.addAll(addOptions());
+        List<OptionData> options = new ArrayList<>(addOptions());
+        options.add(new OptionData(OptionType.BOOLEAN, "ephemeral", "Should the response be ephemeral? (Non-visible to others)", false));
         return options;
     }
 
@@ -82,7 +81,7 @@ public interface CanvasCommandModule extends CommandModule {
         DiscordCommand annotation = getClass().getAnnotation(DiscordCommand.class);
         if (annotation == null) {
             try {
-                annotation = getClass().getMethod("canvasCommand", SlashCommandInteractionEvent.class).getAnnotation(DiscordCommand.class);
+                annotation = getClass().getMethod("canvasCommand", SlashCommandInteractionEvent.class, DiscordCanvasUser.class, boolean.class).getAnnotation(DiscordCommand.class);
             } catch (NoSuchMethodException ignored) {
             }
         }

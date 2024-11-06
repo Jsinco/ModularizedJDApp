@@ -47,7 +47,6 @@ public class DiscordCanvasUserManager implements ShutdownSavable {
     }
 
 
-
     public static void createLinkedAccount(String discordId, String canvasKey, Institution institution) {
         loadedDiscordCanvasUsers.add(new DiscordCanvasUser(discordId, canvasKey, institution));
         serializeAndSave();

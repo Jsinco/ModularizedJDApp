@@ -33,6 +33,7 @@ public final class Util {
         return buildChoicesFromEnum(enumClass, new String[0]);
     }
 
+
     public static <E extends Enum<E>> List<Command.Choice> buildChoicesFromEnum(Class<E> enumClass, String... ignore) {
         List<String> ignoreList = List.of(ignore);
         return Stream.of(enumClass.getEnumConstants())
