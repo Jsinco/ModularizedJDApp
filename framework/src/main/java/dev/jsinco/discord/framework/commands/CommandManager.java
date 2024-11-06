@@ -34,7 +34,7 @@ import java.util.Map;
 public class CommandManager extends Tickable {
 
     private static final Map<String, CommandModule> COMMAND_MODULE_MAP = new HashMap<>();
-    private final Settings settings = Settings.getInstance();
+    private static final Settings settings = Settings.getInstance();
 
     // For embedded commands in the framework which must be registered manually
     public CommandManager() {
@@ -87,36 +87,10 @@ public class CommandManager extends Tickable {
         try {
             command.execute(event);
         } catch (Throwable throwable) {
-            FrameWorkLogger.error("An exception occurred while executing command: " + event.getName(), throwable);
-            if (event.isAcknowledged()) {
-                return;
-            }
-
-            if (settings.isSendErrors()) {
-                String cause = "Unknown Cause";
-                if (throwable.getCause() != null) {
-                    cause = throwable.getCause().getMessage();
-                }
-                event.replyEmbeds(new EmbedBuilder()
-                        .setDescription(getMdFormattedStackTrace(throwable))
-                        .addField("Cause", cause, true)
-                        .addField("Message", throwable.getMessage(), true)
-                        .setTitle("**An exception occurred while executing this command**")
-                        .setColor(Color.PINK).build())
-                        .addActionRow(
-                            Button.of(ButtonStyle.PRIMARY, "commandmanager-show-errors", "Show Exceptions?", Emoji.fromUnicode("U+1F6A6"))
-                ).queue();
-            } else {
-                event.replyEmbeds(new EmbedBuilder()
-                        .setTitle("An exception occurred while executing this command")
-                        .setColor(Color.PINK).build())
-                        .addActionRow(
-                                Button.of(ButtonStyle.PRIMARY, "commandmanager-show-errors", "Show Exceptions?", Emoji.fromUnicode("U+1F6A6"))
-                        ).queue();
-            }
-
+            handleCommandException(event, throwable);
         }
     }
+
 
     @SubscribeEvent
     public void onButtonClick(ButtonInteractionEvent event) {
@@ -130,8 +104,46 @@ public class CommandManager extends Tickable {
         event.reply("Exceptions will now be **" + (settings.isSendErrors() ? "shown" : "hidden") + "**.").setEphemeral(true).queue();
     }
 
+    public static void handleCommandException(SlashCommandInteractionEvent event, Throwable throwable) {
+        FrameWorkLogger.error("An exception occurred while executing command: " + event.getName(), throwable);
+        if (event.isAcknowledged()) {
+            return;
+        }
 
-    private String getMdFormattedStackTrace(Throwable throwable) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+        if (settings.isSendErrors()) {
+            String cause = "Unknown Cause";
+            if (throwable.getCause() != null) {
+                cause = throwable.getCause().getMessage();
+            }
+
+            embedBuilder.setDescription(getMdFormattedStackTrace(throwable))
+                    .addField("Cause", cause, true)
+                    .addField("Message", throwable.getMessage(), true)
+                    .setTitle("**An exception occurred while executing this command**")
+                    .setColor(Color.PINK);
+
+
+        } else {
+            embedBuilder
+                    .setTitle("An exception occurred while executing this command")
+                    .setColor(Color.PINK);
+        }
+
+        if (!event.isAcknowledged()) {
+            event.replyEmbeds(embedBuilder.build()).addActionRow(
+                    Button.of(ButtonStyle.PRIMARY, "commandmanager-show-errors", "Show Exceptions?", Emoji.fromUnicode("U+1F6A6"))
+            ).queue();
+        } else {
+            event.getHook().sendMessageEmbeds(embedBuilder.build()).addActionRow(
+                    Button.of(ButtonStyle.PRIMARY, "commandmanager-show-errors", "Show Exceptions?", Emoji.fromUnicode("U+1F6A6"))
+            ).queue();
+        }
+    }
+
+
+    private static String getMdFormattedStackTrace(Throwable throwable) {
         StringBuilder builder = new StringBuilder();
         for (StackTraceElement element : throwable.getStackTrace()) {
             if (element.getClassName().startsWith(FrameWork.getCaller().getPackageName()) || element.getClassName().startsWith("dev.jsinco.discord.framework")) {
@@ -144,7 +156,7 @@ public class CommandManager extends Tickable {
     }
 
 
-    public String getGithubFileUrlFromStackElement(StackTraceElement element) {
+    public static String getGithubFileUrlFromStackElement(StackTraceElement element) {
         if (element.getClassName().contains("framework")) {
             return settings.getRepository() + "blob/" + settings.getBranch() + "/framework/src/main/java/"  + element.getClassName().replace(".", "/") + ".java#L" + element.getLineNumber();
         }

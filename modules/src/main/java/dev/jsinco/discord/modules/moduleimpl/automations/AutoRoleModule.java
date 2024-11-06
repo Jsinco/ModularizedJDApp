@@ -1,11 +1,10 @@
-package dev.jsinco.discord.modules.automations;
+package dev.jsinco.discord.modules.moduleimpl.automations;
 
 import dev.jsinco.discord.framework.commands.DiscordCommand;
-import dev.jsinco.discord.framework.events.ListenerModule;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.util.Module;
-import dev.jsinco.discord.modules.data.ModuleData;
+import dev.jsinco.discord.modules.files.ModuleData;
 import dev.jsinco.discord.modules.util.Util;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;

@@ -19,7 +19,7 @@ public interface CommandModule extends AbstractModule {
      * Execute the command.
      * @param event The event that triggered the command.
      */
-    void execute(SlashCommandInteractionEvent event);
+    void execute(SlashCommandInteractionEvent event) throws Exception;
 
     /**
      * Get the options for this command.

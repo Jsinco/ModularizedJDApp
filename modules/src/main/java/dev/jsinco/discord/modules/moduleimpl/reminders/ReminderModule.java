@@ -1,4 +1,4 @@
-package dev.jsinco.discord.modules.reminders;
+package dev.jsinco.discord.modules.moduleimpl.reminders;
 
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.scheduling.TimeUnit;
@@ -8,7 +8,7 @@ import dev.jsinco.discord.framework.commands.DiscordCommand;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.serdes.Serdes;
 import dev.jsinco.discord.framework.util.Module;
-import dev.jsinco.discord.modules.data.ModuleData;
+import dev.jsinco.discord.modules.files.ModuleData;
 import dev.jsinco.discord.modules.util.Util;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.Channel;

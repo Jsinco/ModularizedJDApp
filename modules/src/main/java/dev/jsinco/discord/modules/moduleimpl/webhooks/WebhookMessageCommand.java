@@ -1,4 +1,4 @@
-package dev.jsinco.discord.modules.webhooks;
+package dev.jsinco.discord.modules.moduleimpl.webhooks;
 
 import dev.jsinco.discord.framework.commands.CommandModule;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;

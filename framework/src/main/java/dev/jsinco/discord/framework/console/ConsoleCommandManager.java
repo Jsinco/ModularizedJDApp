@@ -1,9 +1,11 @@
 package dev.jsinco.discord.framework.console;
 
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -12,6 +14,7 @@ import java.util.Scanner;
  * @see ConsoleCommand
  * @author Jonah
  */
+@Getter
 public class ConsoleCommandManager {
 
     private static ConsoleCommandManager singleton;
@@ -36,15 +39,17 @@ public class ConsoleCommandManager {
         return this;
     }
 
-    public Map<String, ConsoleCommand> getCommands() {
-        return commands;
-    }
-
     private void start() {
         Thread thread = new Thread(() -> {
             Scanner scanner = new Scanner(System.in);
             while (true) {
-                String input = scanner.nextLine();
+                String input;
+                try {
+                    input = scanner.nextLine();
+                } catch (NoSuchElementException e) {
+                    FrameWorkLogger.info("Console input closed. Exiting...");
+                    break;
+                }
 
                 if (input.isEmpty()) {
                     continue;

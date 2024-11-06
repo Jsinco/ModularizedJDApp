@@ -1,9 +1,10 @@
-package dev.jsinco.discord.modules.system;
+package dev.jsinco.discord.modules.moduleimpl.system;
 
 import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.commands.CommandModule;
 import dev.jsinco.discord.framework.commands.DiscordCommand;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
+import dev.jsinco.discord.framework.settings.Settings;
 import dev.jsinco.discord.modules.util.Util;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -34,6 +35,12 @@ public class PresenceCommand implements CommandModule {
         Presence presence = jda.getPresence();
         presence.setStatus(status);
         presence.setActivity(activityType == null ? null : Activity.of(activityType, activity));
+
+        Settings settings = Settings.getInstance();
+        settings.setDefaultStatus(status);
+        settings.setDefaultActivityType(activityType);
+        settings.setDefaultActivity(activity);
+        settings.save();
         event.reply("Presence updated.").setEphemeral(true).queue();
     }
 

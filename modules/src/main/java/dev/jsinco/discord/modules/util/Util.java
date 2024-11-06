@@ -46,7 +46,7 @@ public final class Util {
                 .toList();
     }
 
-    // String parsing
+    // String utils
 
     public static LocalDateTime parseDateTime(String dateTime) {
         String[] parts = dateTime.split("T");
@@ -115,6 +115,15 @@ public final class Util {
                 Integer.valueOf(hex.substring(3, 5), 16),
                 Integer.valueOf(hex.substring(5, 7), 16)
         );
+    }
+
+    @Nullable
+    public static String getFromEnvironment(String key) {
+        String str = System.getProperty(key);
+        if (str == null) {
+            str = System.getenv(key);
+        }
+        return str;
     }
 
     // OptionMappings

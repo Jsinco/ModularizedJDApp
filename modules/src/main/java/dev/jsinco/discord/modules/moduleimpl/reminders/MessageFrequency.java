@@ -1,4 +1,4 @@
-package dev.jsinco.discord.modules.reminders;
+package dev.jsinco.discord.modules.moduleimpl.reminders;
 
 import dev.jsinco.discord.modules.util.Util;
 import lombok.Getter;

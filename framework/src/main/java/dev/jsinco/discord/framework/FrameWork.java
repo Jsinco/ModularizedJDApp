@@ -12,10 +12,15 @@ import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.reflect.ReflectionUtil;
 import dev.jsinco.discord.framework.scheduling.Tickable;
+import dev.jsinco.discord.framework.settings.Settings;
+import dev.jsinco.discord.framework.shutdown.ShutdownManager;
+import dev.jsinco.discord.framework.shutdown.ShutdownSavable;
 import dev.jsinco.discord.framework.util.AbstainRegistration;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
@@ -57,20 +62,30 @@ public final class FrameWork {
 
         if (botToken == null || botToken.length() < MINIMUM_BOT_TOKEN_LENGTH) {
             FrameWorkLogger.error("You must provide a Discord Bot token to run this application!");
-            FrameWorkLogger.error("Use JVM argument: '-DbotToken=YOUR_BOT_TOKEN' or provide a bot token as environment variable: 'botToken'");
+            FrameWorkLogger.error("Use JVM argument: -DbotToken=\"YOUR_BOT_TOKEN\" or provide a bot token as environment variable: 'botToken'");
             System.exit(0);
         }
 
         botToken = botToken.replace(" ", "").trim();
         timer = new Timer(caller.getSimpleName().toLowerCase() + "-scheduler");
 
+        Settings settings = Settings.getInstance();
         jda = JDABuilder.createDefault(botToken)
-                .enableIntents(GatewayIntent.GUILD_MESSAGES,
+                .enableIntents(
+                        // Enable all intents for modules.
+                        GatewayIntent.GUILD_MESSAGES,
                         GatewayIntent.MESSAGE_CONTENT,
-                        GatewayIntent.GUILD_MEMBERS)
+                        GatewayIntent.GUILD_MEMBERS,
+                        GatewayIntent.GUILD_WEBHOOKS,
+                        GatewayIntent.GUILD_MESSAGE_TYPING,
+                        GatewayIntent.DIRECT_MESSAGE_TYPING
+                )
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
-                .setAutoReconnect(true).build();
+                .setAutoReconnect(true)
+                .setStatus(settings.getDefaultStatus())
+                .setActivity(settings.getDefaultActivityType() == null ? null : Activity.of(settings.getDefaultActivityType(), settings.getDefaultActivity()))
+                .build();
 
         try {
             jda.awaitReady();
@@ -106,16 +121,21 @@ public final class FrameWork {
 
         // one last injection
         injectStaticFields();
+        ShutdownManager.registerShutdownHook();
     }
 
     public static void reflectivelyRegisterClasses() {
-        Set<Class<?>> classes = ReflectionUtil.getAllClassesFor(ListenerModule.class, CommandModule.class, Tickable.class);
+        Set<Class<?>> classes = ReflectionUtil.getAllClassesFor(ListenerModule.class, CommandModule.class, Tickable.class, ShutdownSavable.class);
 
         for (Class<?> aClass : classes) {
+            if (aClass.isInterface() || Modifier.isAbstract(aClass.getModifiers())) {
+                continue;
+            }
 
             try {
                 Object instance = aClass.getDeclaredConstructor().newInstance();
-                if (instance instanceof ListenerModule listenerModule) {
+                if (ListenerModule.class.isAssignableFrom(aClass)) {
+                    ListenerModule listenerModule = (ListenerModule) instance;
                     if (aClass.isAnnotationPresent(AbstainRegistration.class)) {
                         listenerModule.registerInactive();
                     } else {
@@ -128,13 +148,20 @@ public final class FrameWork {
                     continue;
                 }
 
-                if (instance instanceof CommandModule commandModule) {
+                if (CommandModule.class.isAssignableFrom(aClass)) {
+                    CommandModule commandModule = (CommandModule) instance;
                     FrameWorkLogger.info("Registering command module (" + commandModule.getClass().getSimpleName() + ")");
                     commandModule.register();
                 }
-                if (instance instanceof Tickable timerTickable) {
+                if (Tickable.class.isAssignableFrom(aClass)) {
+                    Tickable timerTickable = (Tickable) instance;
                     FrameWorkLogger.info("Registering timer tickable (" + timerTickable.getClass().getSimpleName() + ")");
                     timer.schedule(timerTickable, timerTickable.getDelay(), timerTickable.getPeriod());
+                }
+                if (ShutdownSavable.class.isAssignableFrom(aClass)) {
+                    ShutdownSavable shutdownSavable = (ShutdownSavable) instance;
+                    FrameWorkLogger.info("Registering shutdown savable (" + shutdownSavable.getClass().getSimpleName() + ")");
+                    ShutdownManager.registerSavable(shutdownSavable);
                 }
             } catch (NoSuchMethodException ignored) {
                 // If the class doesn't have a no-args constructor, the developer has to register it manually

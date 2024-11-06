@@ -1,6 +1,5 @@
-package dev.jsinco.discord.modules.reminders;
+package dev.jsinco.discord.modules.moduleimpl.reminders;
 
-import dev.jsinco.abstractjavafilelib.schemas.SnakeYamlConfig;
 import dev.jsinco.discord.framework.commands.CommandModule;
 import dev.jsinco.discord.framework.commands.DiscordCommand;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
@@ -12,7 +11,6 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -28,8 +26,6 @@ public class ReminderDeleteCommand implements CommandModule {
 
     @InjectStatic(ReminderModule.class)
     private static ConcurrentLinkedQueue<WrappedReminder> wrappedReminders;
-    @InjectStatic(Main.class)
-    private static SnakeYamlConfig saves;
     @InjectStatic(value = ReminderModule.class, specificField = "SAVE_REGION")
     private static String SAVE_REGION;
 

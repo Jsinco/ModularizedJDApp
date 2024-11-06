@@ -1,4 +1,4 @@
-package dev.jsinco.discord.modules.reminders;
+package dev.jsinco.discord.modules.moduleimpl.reminders;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;

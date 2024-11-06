@@ -1,12 +1,10 @@
 package dev.jsinco.discord.modules;
 
-import dev.jsinco.abstractjavafilelib.FileLibSettings;
 import dev.jsinco.discord.framework.AbstractModule;
 import dev.jsinco.discord.framework.FrameWork;
-import dev.jsinco.abstractjavafilelib.schemas.SnakeYamlConfig;
-import lombok.Getter;
+import dev.jsinco.discord.modules.util.Util;
 
-import java.io.*;
+import java.io.File;
 import java.nio.file.Path;
 
 /**
@@ -20,7 +18,6 @@ import java.nio.file.Path;
 public class Main {
 
 
-
     public static void main(String[] args) {
         // Optional custom data folder stuff. In the future, we can use more than just these simple flat files from my lib.
         Path dataFolderPath = setupDataFolder();
@@ -32,26 +29,33 @@ public class Main {
 
 
     private static Path setupDataFolder() {
-        String newDataFolderPath = System.getProperty("dataFolder");
-        if (newDataFolderPath == null) {
-            newDataFolderPath = System.getenv("dataFolder");
-        }
+        String newDataFolderPath = Util.getFromEnvironment("dataFolder");
+        File folder = getDefaultDataFolder();
 
         if (newDataFolderPath != null) {
-            File newFolder = new File(newDataFolderPath);
+            folder = new File(newDataFolderPath);
 
-            if (!newFolder.exists()) {
-                newFolder.mkdirs();
-                System.out.println("Created new data folder at " + newFolder.getPath() + ".");
+            if (!folder.exists()) {
+                folder.mkdirs();
+                System.out.println("Created new data folder at " + folder.getPath() + ".");
             }
 
-            if (!newFolder.isDirectory()) {
+            if (!folder.isDirectory()) {
                 System.out.println("Provided data folder is not a directory. Using default data folder instead.");
-            } else {
-                FileLibSettings.set(newFolder);
             }
         }
-        return FileLibSettings.getDataFolder().toPath();
+        return folder.toPath();
+    }
+
+    private static File getDefaultDataFolder() {
+        String path = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        File jarFile = new File(path);
+        String jarDir = jarFile.getParentFile().getAbsolutePath();
+
+        File dataFolder = new File(jarDir + File.separator + "data");
+        dataFolder.mkdirs();
+
+        return dataFolder;
     }
 
 }

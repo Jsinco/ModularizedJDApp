@@ -1,34 +1,38 @@
 package dev.jsinco.discord.framework.settings;
 
-import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
+import eu.okaeri.configs.annotation.Exclude;
 import lombok.Getter;
 import lombok.Setter;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
 
-@Getter
-@Setter
-public final class Settings extends OkaeriYamlConfig<Settings> {
+@Getter @Setter
+public final class Settings extends OkaeriYamlConfig {
 
-    @CustomKey("enhanced-errors.sendErrors")
     @Comment("Send errors to users if a command throws an exception.")
-    public boolean sendErrors = false;
+    private boolean sendErrors = false;
 
-    @CustomKey("enhanced-errors.repository")
     @Comment("Remote Github repository for this project for enhanced error reporting. (Should include '/' at the end)")
-    public String repository = "https://github.com/Coding-Club-HCC/DiscordBot/";
+    private String repository = "https://github.com/Coding-Club-HCC/DiscordBot/";
 
-    @CustomKey("enhanced-errors.branch")
     @Comment("Branch of the remote Github repository for this project for enhanced error reporting.")
-    public String branch = "master";
+    private String branch = "master";
 
-    @CustomKey("enhanced-errors.module")
     @Comment("The module path.")
-    public String module = "modules/src/main/java";
+    private String module = "modules/src/main/java";
 
+    @Comment("The default online status.")
+    private OnlineStatus defaultStatus = OnlineStatus.DO_NOT_DISTURB;
+
+    @Comment("The default activity type.")
+    private Activity.ActivityType defaultActivityType = null;
+
+    @Comment("The default activity.")
+    private String defaultActivity = "dev.jsinco.discord";
+
+    @Exclude
     @Getter
-    private static Settings instance = new Settings();
-    private Settings() {
-        super(Settings.class, "settings.yml");
-    }
+    private static Settings instance = createConfig(Settings.class, "settings.yml");
 }

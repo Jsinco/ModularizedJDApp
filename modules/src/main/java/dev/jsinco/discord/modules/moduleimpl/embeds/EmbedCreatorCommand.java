@@ -1,4 +1,4 @@
-package dev.jsinco.discord.modules.embeds;
+package dev.jsinco.discord.modules.moduleimpl.embeds;
 
 import dev.jsinco.discord.framework.commands.CommandModule;
 import dev.jsinco.discord.framework.commands.DiscordCommand;

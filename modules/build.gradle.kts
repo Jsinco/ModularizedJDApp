@@ -5,14 +5,13 @@ plugins {
 }
 
 repositories {
+    mavenCentral()
     maven("https://jitpack.io")
 }
 
 dependencies {
     implementation(project(":framework"))
-    implementation("com.github.Jsinco:AbstractJavaFileLib:2.2") {
-        exclude("com.google.gson", "gson")
-    }
+    implementation("com.github.kstateome:canvas-api:2.0.0") // Canvas integration
 }
 
 tasks {
@@ -21,15 +20,20 @@ tasks {
         dependsOn(shadowJar)
     }
 
-    processResources {
-        outputs.upToDateWhen { false }
-        println(project.version.toString())
-        filter<ReplaceTokens>(mapOf(
-            "tokens" to mapOf("version" to project.version.toString()),
-            "beginToken" to "\${",
-            "endToken" to "}"
-        ))
-    }
+//    processResources {
+//        // check if file is not yaml
+//        if (file("src/main/resources").exists()) {
+//            from("src/main/resources") {
+//                exclude("**/*.yml")
+//            }
+//        }
+//        outputs.upToDateWhen { false }
+//        filter<ReplaceTokens>(mapOf(
+//            "tokens" to mapOf("version" to project.version.toString()),
+//            "beginToken" to "\${",
+//            "endToken" to "}"
+//        ))
+//    }
 
     shadowJar {
         dependencies {
