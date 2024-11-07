@@ -80,7 +80,7 @@ public class CommandManager extends Tickable {
         if (command == null) {
             return;
         }
-        if (!event.getMember().hasPermission(command.getCommandInfo().permission())) {
+        if (event.getMember() != null && !event.getMember().hasPermission(command.getCommandInfo().permission())) {
             event.reply("You do not have permission to use this command!\n-# Permission Node: " + command.getCommandInfo().permission().getName()).queue();
             return;
         }

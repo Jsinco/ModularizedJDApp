@@ -1,8 +1,9 @@
-package dev.jsinco.discord.modules.moduleimpl.canvas;
+package dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
+import dev.jsinco.discord.modules.moduleimpl.canvas.DiscordCanvasUserManager;
 import edu.ksu.canvas.oauth.NonRefreshableOauthToken;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,9 +12,15 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @ToString
 @Getter @Setter
-public class DiscordCanvasUser {
+public class DiscordCanvasUser implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @InjectStatic(FrameWork.class)
     private static JDA jda;
@@ -22,8 +29,9 @@ public class DiscordCanvasUser {
     private final String canvasToken;
     private final Institution institution;
 
-    private User user = null;
-    private NonRefreshableOauthToken oauth = null;
+    private boolean notifications = true;
+    private transient User user = null;
+    private transient NonRefreshableOauthToken oauth = null;
 
     public DiscordCanvasUser(String discordId, String canvasToken, Institution institution) {
         Preconditions.checkNotNull(discordId, "Discord ID cannot be null");
@@ -33,6 +41,11 @@ public class DiscordCanvasUser {
         this.discordId = discordId;
         this.canvasToken = canvasToken;
         this.institution = institution;
+    }
+
+    public DiscordCanvasUser(String discordId, String canvasToken, Institution institution, boolean notifications) {
+        this(discordId, canvasToken, institution);
+        this.notifications = notifications;
     }
 
     public User getUser() {

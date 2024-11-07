@@ -127,8 +127,11 @@ public final class Util {
         return str;
     }
 
-    public static String removeUselessIndents(String message) {
-        return message.replaceAll("\n\\s+", "");
+    public static String cutOffString(String input, int maxLength) {
+        if (input == null) {
+            return null;
+        }
+        return input.length() <= maxLength ? input : input.substring(0, maxLength);
     }
 
     // OptionMappings

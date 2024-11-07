@@ -3,7 +3,7 @@ package dev.jsinco.discord.modules.moduleimpl.canvas.commands.linking;
 import dev.jsinco.discord.framework.commands.CommandModule;
 import dev.jsinco.discord.framework.commands.DiscordCommand;
 import dev.jsinco.discord.modules.moduleimpl.canvas.DiscordCanvasUserManager;
-import dev.jsinco.discord.modules.moduleimpl.canvas.Institution;
+import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.Institution;
 import dev.jsinco.discord.modules.util.Util;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;

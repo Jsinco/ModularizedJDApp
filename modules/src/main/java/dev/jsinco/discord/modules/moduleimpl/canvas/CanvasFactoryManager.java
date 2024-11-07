@@ -1,5 +1,6 @@
 package dev.jsinco.discord.modules.moduleimpl.canvas;
 
+import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.Institution;
 import edu.ksu.canvas.CanvasApiFactory;
 
 import java.util.HashMap;

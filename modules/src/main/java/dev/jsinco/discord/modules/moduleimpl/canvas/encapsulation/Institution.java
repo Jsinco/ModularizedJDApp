@@ -1,11 +1,10 @@
-package dev.jsinco.discord.modules.moduleimpl.canvas;
+package dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation;
 
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.modules.util.ImageUtil;
 import dev.jsinco.discord.modules.util.Util;
 import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,7 +32,7 @@ public enum Institution {
             "https://canvas.instructure.com", // Must be a valid instructure URL (obviously)
             "Unknown Institution", // The institution's proper name
             "Unknown-Institution", // The institution's abbreviated name
-            Color.GRAY // A color to represent the institution
+            "#e4fbea" // A color to represent the institution
             // Any known restrictions for this institution's Canvas API (student accounts)
     )
     ;

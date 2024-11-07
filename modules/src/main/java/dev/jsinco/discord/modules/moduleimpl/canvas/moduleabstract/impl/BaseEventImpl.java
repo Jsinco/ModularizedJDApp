@@ -3,7 +3,7 @@ package dev.jsinco.discord.modules.moduleimpl.canvas.moduleabstract.impl;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.scheduling.Tickable;
 import dev.jsinco.discord.framework.scheduling.TimeUnit;
-import dev.jsinco.discord.modules.moduleimpl.canvas.DiscordCanvasUser;
+import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.DiscordCanvasUser;
 import dev.jsinco.discord.modules.moduleimpl.canvas.DiscordCanvasUserManager;
 import edu.ksu.canvas.interfaces.CanvasReader;
 

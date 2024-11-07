@@ -1,4 +1,4 @@
-package dev.jsinco.discord.modules.moduleimpl.canvas;
+package dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation;
 
 import lombok.Getter;
 

@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Path;
@@ -136,7 +137,11 @@ public final class FrameWork {
             }
 
             try {
-                Object instance = aClass.getDeclaredConstructor().newInstance();
+                Constructor<?> constructor = aClass.getDeclaredConstructor();
+                if (Modifier.isPrivate(constructor.getModifiers())) {
+                    continue;
+                }
+                Object instance = constructor.newInstance();
                 if (ListenerModule.class.isAssignableFrom(aClass)) {
                     ListenerModule listenerModule = (ListenerModule) instance;
                     if (aClass.isAnnotationPresent(AbstainRegistration.class)) {

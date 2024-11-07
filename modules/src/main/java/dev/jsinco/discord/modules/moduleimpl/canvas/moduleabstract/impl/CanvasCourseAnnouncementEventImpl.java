@@ -3,7 +3,7 @@ package dev.jsinco.discord.modules.moduleimpl.canvas.moduleabstract.impl;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.scheduling.TimeUnit;
 import dev.jsinco.discord.modules.moduleimpl.canvas.CanvasFactoryManager;
-import dev.jsinco.discord.modules.moduleimpl.canvas.DiscordCanvasUser;
+import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.DiscordCanvasUser;
 import edu.ksu.canvas.CanvasApiFactory;
 import edu.ksu.canvas.interfaces.CourseReader;
 import edu.ksu.canvas.interfaces.DiscussionTopicReader;
@@ -32,6 +32,9 @@ public class CanvasCourseAnnouncementEventImpl extends BaseEventImpl {
 
     @Override
     public void tickEvent(DiscordCanvasUser user) throws IOException {
+        if (!user.isNotifications())  {
+            return;
+        }
         long start = System.currentTimeMillis();
         CanvasApiFactory factory = CanvasFactoryManager.getFactory(user.getInstitution());
         List<Course> courses = factory.getReader(CourseReader.class, user.getOauth()).listCurrentUserCourses(new ListCurrentUserCoursesOptions());
@@ -56,7 +59,7 @@ public class CanvasCourseAnnouncementEventImpl extends BaseEventImpl {
                 }
 
                 readAnnouncements.computeIfAbsent(user.getUser().getIdLong(), k -> new ArrayList<>()).add(topic.getId());
-                this.dispatchEvent(DiscussionTopicReader.class, user, topic);
+                this.dispatchEvent(DiscussionTopicReader.class, user, topic, course);
                 break OUTER_LOOP;
             }
         }

@@ -1,11 +1,17 @@
 package dev.jsinco.discord.modules.moduleimpl.canvas;
 
+import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
+import dev.jsinco.discord.framework.scheduling.Tick;
+import dev.jsinco.discord.framework.scheduling.Tickable;
+import dev.jsinco.discord.framework.scheduling.TimeUnit;
 import dev.jsinco.discord.framework.serdes.Serdes;
 import dev.jsinco.discord.framework.shutdown.ShutdownSavable;
 import dev.jsinco.discord.modules.cryptography.AESEncrypt;
 import dev.jsinco.discord.modules.files.ModuleData;
+import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.DiscordCanvasUser;
+import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.Institution;
 import dev.jsinco.discord.modules.util.Util;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
@@ -13,8 +19,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+@Tick(unit = TimeUnit.MINUTES, period = 30)
 @Getter
-public class DiscordCanvasUserManager implements ShutdownSavable {
+public class DiscordCanvasUserManager extends Tickable {
 
     @InjectStatic(ModuleData.class)
     private static ModuleData moduleData;
@@ -43,10 +50,14 @@ public class DiscordCanvasUserManager implements ShutdownSavable {
         } else {
             FrameWorkLogger.error("Failed to load canvas users, missing encryption key.");
         }
+
+        // saving
+        FrameWork.registerTickable(this);
+        Runtime.getRuntime().addShutdownHook(new Thread(this::serializeAndSave));
     }
 
     @Override
-    public void onShutdown() {
+    public void onTick() {
         serializeAndSave();
     }
 
