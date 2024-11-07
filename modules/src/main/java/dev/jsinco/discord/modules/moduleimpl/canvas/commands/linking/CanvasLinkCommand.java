@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.util.List;
 
-@DiscordCommand(name = "canvas-link", description = "Link your Discord account with your Canvas account.")
+@DiscordCommand(name = "canvas-link", description = "Link your Discord account with your Canvas account.", guildOnly = false)
 public class CanvasLinkCommand implements CommandModule {
     @Override
     public void execute(SlashCommandInteractionEvent event) {

@@ -4,7 +4,7 @@ import dev.jsinco.discord.framework.commands.DiscordCommand;
 import dev.jsinco.discord.modules.moduleimpl.canvas.CanvasFactoryManager;
 import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.DiscordCanvasUser;
 import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.Institution;
-import dev.jsinco.discord.modules.moduleimpl.canvas.moduleabstract.interfaces.CanvasCommandModule;
+import dev.jsinco.discord.modules.moduleimpl.canvas.moduleabstract.interfaces.CanvasCommand;
 import edu.ksu.canvas.CanvasApiFactory;
 import edu.ksu.canvas.interfaces.CourseReader;
 import edu.ksu.canvas.model.Course;
@@ -14,8 +14,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import java.io.IOException;
 import java.util.List;
 
-@DiscordCommand(name = "canvas-courses", description = "Show the courses you are enrolled in on Canvas")
-public class ShowCoursesCommand implements CanvasCommandModule {
+@DiscordCommand(name = "canvas-courses", description = "Show the courses you are enrolled in on Canvas", guildOnly = false)
+public class ShowCoursesCommand implements CanvasCommand {
     @Override
     public void canvasCommand(SlashCommandInteractionEvent event, DiscordCanvasUser user, boolean ephemeral) throws IOException {
         event.deferReply(ephemeral).queue();

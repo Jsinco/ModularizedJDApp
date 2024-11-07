@@ -4,6 +4,7 @@ import dev.jsinco.discord.framework.serdes.TypeAdapter;
 import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.util.Pair;
+import dev.jsinco.discord.modules.util.StringUtil;
 import dev.jsinco.discord.modules.util.Util;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,7 +60,7 @@ public class WrappedReminder {
         String message = this.message;
         String title = "Reminder";
         if (message.contains("title=")) {
-            Pair<String, String> titleBody = Util.parseTitle(message, "Reminder");
+            Pair<String, String> titleBody = StringUtil.parseTitle(message, "Reminder");
             title = titleBody.first();
             message = titleBody.second();
         }

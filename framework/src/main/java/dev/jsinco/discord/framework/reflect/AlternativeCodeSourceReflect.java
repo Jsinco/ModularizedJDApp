@@ -60,7 +60,8 @@ public final class AlternativeCodeSourceReflect {
                     // If it's a .class file, check if it's a listener class
                     String className = packageName + "." + file.getName().substring(0, file.getName().length() - 6); // remove .class extension
                     try {
-                        Class<?> clazz = Class.forName(className);
+
+                        Class<?> clazz = Class.forName(className, false, AlternativeCodeSourceReflect.class.getClassLoader());
                         // Check if the class extends ListenerModule
                         if (classToSearchFor == null || classToSearchFor.isAssignableFrom(clazz)) {
                             listenerClasses.add(clazz);

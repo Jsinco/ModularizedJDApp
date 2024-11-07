@@ -3,6 +3,7 @@ package dev.jsinco.discord.modules.moduleimpl.embeds;
 import dev.jsinco.discord.framework.commands.CommandModule;
 import dev.jsinco.discord.framework.commands.DiscordCommand;
 import dev.jsinco.discord.framework.util.Pair;
+import dev.jsinco.discord.modules.util.StringUtil;
 import dev.jsinco.discord.modules.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -17,7 +18,7 @@ import java.util.List;
 public class EmbedCreatorCommand implements CommandModule {
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        Pair<String, String> body = Util.parseTitle(Util.getOption(event.getOption("body"), OptionType.STRING, "Should not be null"));
+        Pair<String, String> body = StringUtil.parseTitle(Util.getOption(event.getOption("body"), OptionType.STRING, "Should not be null"));
         String color = Util.getOption(event.getOption("color"), OptionType.STRING, "#FFAFAF");
         String thumbnail = Util.getOption(event.getOption("thumbnail"), OptionType.STRING);
 
@@ -33,7 +34,7 @@ public class EmbedCreatorCommand implements CommandModule {
 
         embedBuilder.setTitle(body.first());
         embedBuilder.setDescription(body.second());
-        embedBuilder.setColor(Util.hex(color));
+        embedBuilder.setColor(StringUtil.hex(color));
 
 
         for (String field : fields) {
@@ -41,7 +42,7 @@ public class EmbedCreatorCommand implements CommandModule {
                 continue;
             }
 
-            Pair<String, String> fieldPair = Util.parseTitle(field);
+            Pair<String, String> fieldPair = StringUtil.parseTitle(field);
             embedBuilder.addField(fieldPair.first(), fieldPair.second(), true);
         }
 

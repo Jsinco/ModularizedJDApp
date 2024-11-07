@@ -2,7 +2,7 @@ package dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation;
 
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.modules.util.ImageUtil;
-import dev.jsinco.discord.modules.util.Util;
+import dev.jsinco.discord.modules.util.StringUtil;
 import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -52,7 +52,7 @@ public enum Institution {
         this.color = Color.DARK_GRAY;
         this.knownRestrictions = knownRestrictions;
 
-        this.canvasLogo = loadCanvasLogo();
+        this.canvasLogo = getCanvasLogo();
     }
 
     Institution(String url, String properName, String abbreviatedName, Color color, KnownRestriction... knownRestrictions) {
@@ -62,38 +62,28 @@ public enum Institution {
         this.color = color;
         this.knownRestrictions = knownRestrictions;
 
-        this.canvasLogo = loadCanvasLogo();
+        this.canvasLogo = getCanvasLogo();
     }
 
     Institution(String url, String properName, String abbreviatedName, String color, KnownRestriction... knownRestrictions) {
         this.url = url;
         this.properName = properName;
         this.abbreviatedName = abbreviatedName;
-        this.color = Util.hex(color);
+        this.color = StringUtil.hex(color);
         this.knownRestrictions = knownRestrictions;
 
-        this.canvasLogo = loadCanvasLogo();
+        this.canvasLogo = getCanvasLogo();
     }
 
     @Nullable
-    public BufferedImage loadCanvasLogo() {
-        BufferedImage bufferedImage;
-        try {
-            bufferedImage = ImageUtil.loadImageFromResources("canvas_logo.png");
-        } catch (IOException e) {
-            FrameWorkLogger.error("Error loading Canvas logo: " + e.getMessage());
-            return null;
-        }
-        if (bufferedImage == null) {
-            return null;
-        }
-        return ImageUtil.replaceImageColors(bufferedImage, Util.hex("#e03d29"), color, 150);
+    public BufferedImage getCanvasLogo() {
+        return getCanvasLogo(color);
     }
 
     @Nullable
     public FileUpload getCanvasLogoFileUpload()  {
         try {
-            return FileUpload.fromData(ImageUtil.bufferedImageToInputStream(loadCanvasLogo(), "png"), "canvas_logo_" + abbreviatedName + ".png");
+            return FileUpload.fromData(ImageUtil.bufferedImageToInputStream(getCanvasLogo(), "png"), "canvas_logo_" + abbreviatedName + ".png");
         } catch (IOException e) {
             FrameWorkLogger.error("Error creating FileUpload for Canvas logo: " + e.getMessage(), e);
             return null;
@@ -109,5 +99,34 @@ public enum Institution {
                 .setColor(color)
                 .setThumbnail(getCanvasLogoUrl())
                 .setAuthor("Canvas LMS For " + abbreviatedName, url, getCanvasLogoUrl());
+    }
+
+
+    public static FileUpload getCanvasLogoFileUpload(Color color, String name)  {
+        try {
+            return FileUpload.fromData(ImageUtil.bufferedImageToInputStream(getCanvasLogo(color), "png"), "canvas_logo_" + name + ".png");
+        } catch (IOException e) {
+            FrameWorkLogger.error("Error creating FileUpload for Canvas logo: " + e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @Nullable
+    public static BufferedImage getCanvasLogo(Color color) {
+        BufferedImage bufferedImage;
+        try {
+            bufferedImage = ImageUtil.loadImageFromResources("canvas_logo.png");
+        } catch (IOException e) {
+            FrameWorkLogger.error("Error loading Canvas logo: " + e.getMessage());
+            return null;
+        }
+        if (bufferedImage == null) {
+            return null;
+        }
+        return ImageUtil.replaceImageColors(bufferedImage, StringUtil.hex("#e03d29"), color, 150);
+    }
+
+    public static String getCanvasLogoUrl(String name) {
+        return "attachment://canvas_logo_" + name + ".png";
     }
 }

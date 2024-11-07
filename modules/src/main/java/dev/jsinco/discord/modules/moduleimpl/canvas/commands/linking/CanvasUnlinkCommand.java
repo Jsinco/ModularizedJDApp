@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.util.List;
 
-@DiscordCommand(name = "canvas-unlink", description = "Unlink your canvas account")
+@DiscordCommand(name = "canvas-unlink", description = "Unlink your canvas account", guildOnly = false)
 public class CanvasUnlinkCommand implements CommandModule {
     @Override
     public void execute(SlashCommandInteractionEvent event) throws Exception {

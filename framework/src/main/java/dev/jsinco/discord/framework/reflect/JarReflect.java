@@ -42,7 +42,16 @@ public class JarReflect {
         Set<Class<?>> foundClasses = ClassPath.from(classLoader)
                 .getTopLevelClasses(packageName)
                 .stream()
-                .map(ClassPath.ClassInfo::load)
+                .map(ClassPath.ClassInfo::getName)
+                .map(name -> {
+                    try {
+                        return Class.forName(name, false, JarReflect.class.getClassLoader());
+                    } catch (ClassNotFoundException e) {
+                        FrameWorkLogger.error("Error while loading class", e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
         if (classes.isEmpty()) {

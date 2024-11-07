@@ -21,7 +21,6 @@ import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
@@ -32,11 +31,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 /**
  * The main class for the framework. Creates our JDA instance and registers all commands and events.
@@ -99,7 +96,6 @@ public final class FrameWork {
         }
 
 
-        // I think this is the best point to inject static fields
         injectStaticFields();
 
         // Using annotations is so much better
@@ -123,9 +119,8 @@ public final class FrameWork {
                 .registerCommand(new DumpJDAInfoCommand())
                 .registerCommand(new RestartCommand());
 
-        // one last injection
+
         injectStaticFields();
-        ShutdownManager.registerShutdownHook();
     }
 
     public static void reflectivelyRegisterClasses() {

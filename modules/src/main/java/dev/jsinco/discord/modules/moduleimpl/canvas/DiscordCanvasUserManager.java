@@ -6,70 +6,52 @@ import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.scheduling.Tick;
 import dev.jsinco.discord.framework.scheduling.Tickable;
 import dev.jsinco.discord.framework.scheduling.TimeUnit;
-import dev.jsinco.discord.framework.serdes.Serdes;
+import dev.jsinco.discord.framework.shutdown.ShutdownManager;
 import dev.jsinco.discord.framework.shutdown.ShutdownSavable;
-import dev.jsinco.discord.modules.cryptography.AESEncrypt;
 import dev.jsinco.discord.modules.files.ModuleData;
 import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.DiscordCanvasUser;
 import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.Institution;
-import dev.jsinco.discord.modules.util.Util;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Tick(unit = TimeUnit.MINUTES, period = 30)
 @Getter
-public class DiscordCanvasUserManager extends Tickable {
+public class DiscordCanvasUserManager extends Tickable implements ShutdownSavable {
 
     @InjectStatic(ModuleData.class)
     private static ModuleData moduleData;
 
     private static DiscordCanvasUserManager instance;
-    private final List<DiscordCanvasUser> loadedDiscordCanvasUsers = new ArrayList<>();
+
+    private final List<DiscordCanvasUser> loadedDiscordCanvasUsers;
+
 
     private DiscordCanvasUserManager() {
-        String encryptKey = Util.getFromEnvironment("encrypt_key");
-        if (encryptKey != null) {
-            AESEncrypt aesEncrypt = new AESEncrypt(encryptKey);
-            Serdes serdes = Serdes.getInstance();
+        this.loadedDiscordCanvasUsers = moduleData.getDiscordCanvasUsers();
+        FrameWorkLogger.info("Loaded " + loadedDiscordCanvasUsers.size() + " canvas users.");
 
-            for (String encryptedUser : ModuleData.getInstance().getEncryptedCanvasUsers()) {
-                String decryptedUser;
-                try {
-                    decryptedUser = aesEncrypt.decrypt(encryptedUser);
-                } catch (Exception e) {
-                    FrameWorkLogger.error("Failed to decrypt canvas user: " + encryptedUser, e);
-                    continue;
-                }
-                DiscordCanvasUser discordCanvasUser = serdes.deserialize(decryptedUser, DiscordCanvasUser.class);
-                loadedDiscordCanvasUsers.add(discordCanvasUser);
-            }
-            FrameWorkLogger.info("Loaded " + loadedDiscordCanvasUsers.size() + " canvas users.");
-        } else {
-            FrameWorkLogger.error("Failed to load canvas users, missing encryption key.");
-        }
 
         // saving
         FrameWork.registerTickable(this);
-        Runtime.getRuntime().addShutdownHook(new Thread(this::serializeAndSave));
+        ShutdownManager.registerSavable(this);
     }
 
     @Override
     public void onTick() {
-        serializeAndSave();
+        moduleData.save();
     }
 
 
     public void createLinkedAccount(String discordId, String canvasKey, Institution institution) {
         loadedDiscordCanvasUsers.add(new DiscordCanvasUser(discordId, canvasKey, institution));
-        serializeAndSave();
+        moduleData.save();
     }
 
     public void removeLinkedAccount(String discordId) {
         loadedDiscordCanvasUsers.removeIf(user -> user.getDiscordId().equals(discordId));
-        serializeAndSave();
+        moduleData.save();
     }
 
     @Nullable
@@ -80,22 +62,6 @@ public class DiscordCanvasUserManager extends Tickable {
                 .orElse(null);
     }
 
-    public void serializeAndSave() {
-        Serdes serdes = Serdes.getInstance();
-        AESEncrypt aesEncrypt = new AESEncrypt(Util.getFromEnvironment("encrypt_key"));
-        List<String> encryptedUsers = new ArrayList<>();
-
-        for (DiscordCanvasUser discordCanvasUser : loadedDiscordCanvasUsers) {
-            try {
-                encryptedUsers.add(aesEncrypt.encrypt(serdes.serialize(discordCanvasUser)));
-            } catch (Exception e) {
-                FrameWorkLogger.error("Failed to encrypt canvas user: " + discordCanvasUser.getDiscordId(), e);
-            }
-        }
-        moduleData.setEncryptedCanvasUsers(encryptedUsers);
-        moduleData.save();
-    }
-
     public static DiscordCanvasUserManager getInstance() {
         if (instance == null) {
             instance = new DiscordCanvasUserManager();
@@ -103,4 +69,9 @@ public class DiscordCanvasUserManager extends Tickable {
         return instance;
     }
 
+    @Override
+    public void onShutdown() {
+
+        moduleData.save();
+    }
 }

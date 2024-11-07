@@ -9,6 +9,7 @@ import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.serdes.Serdes;
 import dev.jsinco.discord.framework.util.Module;
 import dev.jsinco.discord.modules.files.ModuleData;
+import dev.jsinco.discord.modules.util.StringUtil;
 import dev.jsinco.discord.modules.util.Util;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.Channel;
@@ -40,7 +41,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class ReminderModule extends Tickable implements Module {
 
     private static final ConcurrentLinkedQueue<WrappedReminder> wrappedReminders = new ConcurrentLinkedQueue<>();
-    @InjectStatic(ModuleData.class) private static ModuleData savesFile;
+    private static final ModuleData savesFile = ModuleData.getInstance();
 
     private final Serdes serdes = Serdes.getInstance();
 
@@ -67,7 +68,7 @@ public class ReminderModule extends Tickable implements Module {
                 .channel((TextChannel) channel)
                 .message(message)
                 .frequency(new MessageFrequency(interval, repeat))
-                .when(Util.parseDateTime(date, time))
+                .when(StringUtil.parseDateTime(date, time))
                 .build();
         wrappedReminders.add(wrappedReminder);
 

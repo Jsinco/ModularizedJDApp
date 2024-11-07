@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public interface CanvasCommandModule extends CommandModule {
+public interface CanvasCommand extends CommandModule {
 
     void canvasCommand(SlashCommandInteractionEvent event, DiscordCanvasUser canvasUser, boolean ephemeral) throws Exception;
     default List<OptionData> addOptions() {

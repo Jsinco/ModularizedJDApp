@@ -4,7 +4,7 @@ import dev.jsinco.discord.framework.commands.DiscordCommand;
 import dev.jsinco.discord.modules.moduleimpl.canvas.CanvasFactoryManager;
 import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.DiscordCanvasUser;
 import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.Institution;
-import dev.jsinco.discord.modules.moduleimpl.canvas.moduleabstract.interfaces.CanvasCommandModule;
+import dev.jsinco.discord.modules.moduleimpl.canvas.moduleabstract.interfaces.CanvasCommand;
 import dev.jsinco.discord.modules.util.EmbedUtil;
 import edu.ksu.canvas.CanvasApiFactory;
 import edu.ksu.canvas.interfaces.DiscussionTopicReader;
@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.List;
 
 @DiscordCommand(name = "canvas-discussion", description = "Show an announcement for a course on Canvas", guildOnly = false)
-public class CanvasDiscussionCommand implements CanvasCommandModule {
+public class CanvasDiscussionCommand implements CanvasCommand {
 
     CopyDown converter = new CopyDown();
 

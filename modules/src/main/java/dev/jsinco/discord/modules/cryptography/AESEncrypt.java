@@ -1,5 +1,8 @@
 package dev.jsinco.discord.modules.cryptography;
 
+import dev.jsinco.discord.framework.logging.FrameWorkLogger;
+import dev.jsinco.discord.modules.util.StringUtil;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
@@ -7,9 +10,10 @@ import java.util.Base64;
 public class AESEncrypt {
 
     private static final String ALGORITHM = "AES";
+    private static AESEncrypt instance;
     private final String key;
 
-    public AESEncrypt(String key) {
+    private AESEncrypt(String key) {
         this.key = key;
     }
 
@@ -34,5 +38,17 @@ public class AESEncrypt {
         byte[] decryptedData = cipher.doFinal(Base64.getDecoder().decode(encryptedData));
 
         return new String(decryptedData);
+    }
+
+    public static AESEncrypt getInstance() {
+        if (instance == null) {
+            String key = StringUtil.getFromEnvironment("encrypt_key");
+            if (key == null) {
+                FrameWorkLogger.error("Failed to initialize AESEncrypt, key is null.");
+                return null;
+            }
+            instance = new AESEncrypt(key);
+        }
+        return instance;
     }
 }

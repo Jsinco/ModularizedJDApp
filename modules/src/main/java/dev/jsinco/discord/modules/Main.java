@@ -2,7 +2,7 @@ package dev.jsinco.discord.modules;
 
 import dev.jsinco.discord.framework.AbstractModule;
 import dev.jsinco.discord.framework.FrameWork;
-import dev.jsinco.discord.modules.util.Util;
+import dev.jsinco.discord.modules.util.StringUtil;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -29,7 +29,7 @@ public class Main {
 
 
     private static Path setupDataFolder() {
-        String newDataFolderPath = Util.getFromEnvironment("dataFolder");
+        String newDataFolderPath = StringUtil.getFromEnvironment("dataFolder");
         File folder = getDefaultDataFolder();
 
         if (newDataFolderPath != null) {

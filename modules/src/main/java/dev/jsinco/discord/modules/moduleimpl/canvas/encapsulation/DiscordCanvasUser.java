@@ -3,6 +3,7 @@ package dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation;
 import com.google.common.base.Preconditions;
 import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
+import dev.jsinco.discord.framework.serdes.TypeAdapter;
 import dev.jsinco.discord.modules.moduleimpl.canvas.DiscordCanvasUserManager;
 import edu.ksu.canvas.oauth.NonRefreshableOauthToken;
 import lombok.Getter;
@@ -15,21 +16,21 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Serial;
 import java.io.Serializable;
 
-@ToString
+@TypeAdapter(DiscordCanvasUserTypeAdapter.class)
 @Getter @Setter
 public class DiscordCanvasUser implements Serializable {
 
+
     @Serial
     private static final long serialVersionUID = 1L;
-
     @InjectStatic(FrameWork.class)
     private static JDA jda;
 
     private final String discordId;
     private final String canvasToken;
     private final Institution institution;
+    private final DiscordCanvasUserData userData;
 
-    private boolean notifications = true;
     private transient User user = null;
     private transient NonRefreshableOauthToken oauth = null;
 
@@ -41,11 +42,19 @@ public class DiscordCanvasUser implements Serializable {
         this.discordId = discordId;
         this.canvasToken = canvasToken;
         this.institution = institution;
+        this.userData = new DiscordCanvasUserData();
     }
 
-    public DiscordCanvasUser(String discordId, String canvasToken, Institution institution, boolean notifications) {
-        this(discordId, canvasToken, institution);
-        this.notifications = notifications;
+    public DiscordCanvasUser(String discordId, String canvasToken, Institution institution, DiscordCanvasUserData userData) {
+        Preconditions.checkNotNull(discordId, "Discord ID cannot be null");
+        Preconditions.checkNotNull(canvasToken, "Canvas token cannot be null");
+        Preconditions.checkNotNull(institution, "Institution cannot be null");
+        Preconditions.checkNotNull(userData, "User data cannot be null");
+
+        this.discordId = discordId;
+        this.canvasToken = canvasToken;
+        this.institution = institution;
+        this.userData = userData;
     }
 
     public User getUser() {
@@ -65,5 +74,17 @@ public class DiscordCanvasUser implements Serializable {
     @Nullable
     public static DiscordCanvasUser from(User user) {
         return DiscordCanvasUserManager.getInstance().getLinkedAccount(user.getId());
+    }
+
+    @Override
+    public String toString() {
+        return "DiscordCanvasUser{" +
+                "discordId='" + discordId + '\'' +
+                ", canvasToken='" + "<HIDDEN>" + '\'' +
+                ", institution=" + institution +
+                ", userData=" + userData +
+                ", user=" + user +
+                ", oauth=" + oauth +
+                '}';
     }
 }

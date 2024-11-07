@@ -4,22 +4,22 @@ import dev.jsinco.discord.framework.scheduling.TimeUnit;
 import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.DiscordCanvasUser;
 import dev.jsinco.discord.modules.moduleimpl.canvas.encapsulation.DiscordCanvasUserData;
 import edu.ksu.canvas.CanvasApiFactory;
+import edu.ksu.canvas.interfaces.AssignmentReader;
 import edu.ksu.canvas.interfaces.CourseReader;
-import edu.ksu.canvas.interfaces.DiscussionTopicReader;
 import edu.ksu.canvas.model.Course;
-import edu.ksu.canvas.model.DiscussionTopic;
+import edu.ksu.canvas.model.assignment.Assignment;
+import edu.ksu.canvas.requestOptions.ListCourseAssignmentsOptions;
 import edu.ksu.canvas.requestOptions.ListCurrentUserCoursesOptions;
-import edu.ksu.canvas.requestOptions.ListDiscussionTopicsOptions;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
-public class CanvasCourseAnnouncementEventImpl extends BaseEventImpl {
+public class CanvasAssignmentDueEventImpl extends BaseEventImpl {
 
 
-    public CanvasCourseAnnouncementEventImpl(TimeUnit timeUnit, long delay, long period) {
+    public CanvasAssignmentDueEventImpl(TimeUnit timeUnit, long delay, long period) {
         super(timeUnit, delay, period);
     }
 
@@ -30,28 +30,26 @@ public class CanvasCourseAnnouncementEventImpl extends BaseEventImpl {
             return;
         }
 
-
         List<Course> courses = factory.getReader(CourseReader.class, user.getOauth()).listCurrentUserCourses(new ListCurrentUserCoursesOptions());
-        DiscussionTopicReader reader = factory.getReader(DiscussionTopicReader.class, user.getOauth());
+        AssignmentReader reader = factory.getReader(AssignmentReader.class, user.getOauth());
 
         for (Course course : courses) {
-            List<DiscussionTopic> topics = reader.listDiscussionTopics(
-                    new ListDiscussionTopicsOptions(String.valueOf(course.getId()), ListDiscussionTopicsOptions.IdType.COURSES)
-                            .onlyAnnouncements()
-            );
+            List<Assignment> assignments = reader.listCourseAssignments(new ListCourseAssignmentsOptions(String.valueOf(course.getId())));
 
-            for (DiscussionTopic topic : topics) {
-                if (topic.getPostedAt() == null) {
+            for (Assignment assignment : assignments) {
+                if (assignment.getDueAt() == null) {
                     continue;
                 }
-                LocalDate topicDate = topic.getPostedAt().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate topicDate = assignment.getDueAt().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate currentDate = LocalDate.now();
 
-                if (!topicDate.equals(LocalDate.now()) || userData.getNotifiedDiscussions().contains(topic.getId())) {
+
+                if (!topicDate.equals(currentDate) || userData.getNotifiedAssignments().contains(assignment.getId())) {
                     continue;
                 }
 
-                userData.getNotifiedDiscussions().add(topic.getId());
-                this.dispatchEvent(DiscussionTopicReader.class, user, topic, course);
+                userData.getNotifiedAssignments().add(assignment.getId());
+                this.dispatchEvent(AssignmentReader.class, user, assignment, course);
             }
         }
     }

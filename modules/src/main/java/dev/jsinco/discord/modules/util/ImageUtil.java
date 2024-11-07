@@ -1,6 +1,5 @@
 package dev.jsinco.discord.modules.util;
 
-import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 
 import javax.imageio.ImageIO;
@@ -8,11 +7,9 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Path;
 
 public final class ImageUtil {
 
@@ -75,4 +72,12 @@ public final class ImageUtil {
         return Math.abs(r1 - r2) <= margin && Math.abs(g1 - g2) <= margin && Math.abs(b1 - b2) <= margin;
     }
 
+
+    public static Color generateColor(Long input) {
+        // Use a hashing function to generate a color
+        float hue = (input % 360) / 360.0f; // Ensure hue is between 0 and 1
+        float saturation = 0.9f; // High saturation for vibrant colors
+        float brightness = 0.9f; // High brightness for vibrant colors
+        return Color.getHSBColor(hue, saturation, brightness);
+    }
 }

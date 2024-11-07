@@ -24,7 +24,7 @@ public class CanvasCourseAssignmentsCommand implements CanvasModule {
 
     private static final String MODULE_STR = "canvas-assignments";
 
-    @DiscordCommand(name = MODULE_STR, description = "Show information about your Canvas course assignments")
+    @DiscordCommand(name = MODULE_STR, description = "Show information about your Canvas course assignments", guildOnly = false)
     @Override
     public void canvasCommand(SlashCommandInteractionEvent event, DiscordCanvasUser canvasUser, boolean ephemeral) throws Exception {
         event.deferReply(ephemeral).queue();
