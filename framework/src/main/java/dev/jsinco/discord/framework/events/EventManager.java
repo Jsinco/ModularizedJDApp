@@ -1,6 +1,7 @@
 package dev.jsinco.discord.framework.events;
 
 import dev.jsinco.discord.framework.FrameWork;
+import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import lombok.Getter;
 
 import java.util.*;

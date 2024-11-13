@@ -1,6 +1,7 @@
 package dev.jsinco.discord.framework.reflect;
 
 import com.google.common.reflect.ClassPath;
+import dev.jsinco.discord.framework.util.DNI;
 import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import org.jetbrains.annotations.Nullable;
@@ -52,6 +53,7 @@ public class JarReflect {
                     }
                 })
                 .filter(Objects::nonNull)
+                .filter(clazz -> !clazz.isAnnotationPresent(DNI.class))
                 .collect(Collectors.toSet());
 
         if (classes.isEmpty()) {

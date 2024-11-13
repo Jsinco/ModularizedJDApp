@@ -123,4 +123,24 @@ public final class StringUtil {
         }
         return count;
     }
+
+
+    public static String capitalizeAfterSpace(String input) {
+        StringBuilder result = new StringBuilder(input.length());
+        boolean capitalizeNext = false;
+
+        for (char c : input.toCharArray()) {
+            if (capitalizeNext && Character.isLetter(c)) {
+                result.append(Character.toUpperCase(c));
+                capitalizeNext = false;
+            } else {
+                result.append(c);
+            }
+            if (c == ' ') {
+                capitalizeNext = true;
+            }
+        }
+
+        return result.toString();
+    }
 }

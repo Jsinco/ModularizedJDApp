@@ -1,5 +1,6 @@
 package dev.jsinco.discord.framework.reflect;
 
+import dev.jsinco.discord.framework.util.DNI;
 import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import org.jetbrains.annotations.Nullable;
@@ -62,6 +63,9 @@ public final class AlternativeCodeSourceReflect {
                     try {
 
                         Class<?> clazz = Class.forName(className, false, AlternativeCodeSourceReflect.class.getClassLoader());
+                        if (clazz.isAnnotationPresent(DNI.class)) {
+                            continue;
+                        }
                         // Check if the class extends ListenerModule
                         if (classToSearchFor == null || classToSearchFor.isAssignableFrom(clazz)) {
                             listenerClasses.add(clazz);

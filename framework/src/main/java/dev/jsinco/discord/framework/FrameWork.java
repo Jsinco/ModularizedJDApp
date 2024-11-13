@@ -5,16 +5,14 @@ import dev.jsinco.discord.framework.commands.CommandModule;
 import dev.jsinco.discord.framework.console.ConsoleCommandManager;
 import dev.jsinco.discord.framework.console.commands.DumpJDAInfoCommand;
 import dev.jsinco.discord.framework.console.commands.HelpCommand;
-import dev.jsinco.discord.framework.console.commands.RestartCommand;
 import dev.jsinco.discord.framework.console.commands.StopCommand;
 import dev.jsinco.discord.framework.events.ListenerModule;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.reflect.InjectStatic;
 import dev.jsinco.discord.framework.reflect.ReflectionUtil;
+import dev.jsinco.discord.framework.scheduling.ScheduleManager;
 import dev.jsinco.discord.framework.scheduling.Tickable;
 import dev.jsinco.discord.framework.settings.Settings;
-import dev.jsinco.discord.framework.shutdown.ShutdownManager;
-import dev.jsinco.discord.framework.shutdown.ShutdownSavable;
 import dev.jsinco.discord.framework.util.AbstainRegistration;
 import dev.jsinco.discord.framework.util.AutoInstantiated;
 import lombok.Getter;
@@ -32,7 +30,6 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.Timer;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -43,7 +40,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class FrameWork {
 
     @Getter private static JDA jda;
-    @Getter private static Timer timer;
     @Getter private static Class<?> caller;
     @Getter private static Path dataFolderPath;
 
@@ -68,7 +64,7 @@ public final class FrameWork {
         }
 
         botToken = botToken.replace(" ", "").trim();
-        timer = new Timer(caller.getSimpleName().toLowerCase() + "-scheduler");
+
 
         Settings settings = Settings.getInstance();
         jda = JDABuilder.createDefault(botToken)
@@ -104,7 +100,7 @@ public final class FrameWork {
 
         CommandManager commandManager = new CommandManager();
         jda.addEventListener(commandManager); // Manually add this event listener
-        timer.schedule(commandManager, 0L, 10000L); // 10 Sec
+        ScheduleManager.getInstance().schedule(commandManager, 0L, 10000L); // 10 Sec
 
         // Update commands on startup
 //        jda.updateCommands().queue();
@@ -116,15 +112,15 @@ public final class FrameWork {
         ConsoleCommandManager.getInstance()
                 .registerCommand(new StopCommand())
                 .registerCommand(new HelpCommand())
-                .registerCommand(new DumpJDAInfoCommand())
-                .registerCommand(new RestartCommand());
+                .registerCommand(new DumpJDAInfoCommand());
+                //.registerCommand(new RestartCommand());
 
 
         injectStaticFields();
     }
 
     public static void reflectivelyRegisterClasses() {
-        Set<Class<?>> classes = ReflectionUtil.getAllClassesFor(ListenerModule.class, CommandModule.class, Tickable.class, ShutdownSavable.class, AutoInstantiated.class);
+        Set<Class<?>> classes = ReflectionUtil.getAllClassesFor(ListenerModule.class, CommandModule.class, Tickable.class, AutoInstantiated.class);
 
         for (Class<?> aClass : classes) {
             if (aClass.isInterface()) {
@@ -132,7 +128,7 @@ public final class FrameWork {
             }
 
             try {
-                Constructor<?> constructor = aClass.getDeclaredConstructor();
+                Constructor<?> constructor = aClass.getConstructor();
                 if (Modifier.isPrivate(constructor.getModifiers())) {
                     continue;
                 }
@@ -156,16 +152,13 @@ public final class FrameWork {
                     FrameWorkLogger.info("Registering command module (" + commandModule.getClass().getSimpleName() + ")");
                     commandModule.register();
                 }
+
                 if (Tickable.class.isAssignableFrom(aClass)) {
-                    Tickable timerTickable = (Tickable) instance;
-                    FrameWorkLogger.info("Registering timer tickable (" + timerTickable.getClass().getSimpleName() + ")");
-                    timer.schedule(timerTickable, timerTickable.getDelay(), timerTickable.getPeriod());
+                    Tickable tickable = (Tickable) instance;
+                    FrameWorkLogger.info("Registering tickable (" + tickable.getClass().getSimpleName() + ")");
+                    ScheduleManager.getInstance().schedule(tickable);
                 }
-                if (ShutdownSavable.class.isAssignableFrom(aClass)) {
-                    ShutdownSavable shutdownSavable = (ShutdownSavable) instance;
-                    FrameWorkLogger.info("Registering shutdown savable (" + shutdownSavable.getClass().getSimpleName() + ")");
-                    ShutdownManager.registerSavable(shutdownSavable);
-                }
+
                 if (AutoInstantiated.class.isAssignableFrom(aClass)) {
                     ((AutoInstantiated) instance).onInstantiation();
                     FrameWorkLogger.info("Auto-instantiated class: " + aClass.getCanonicalName());
@@ -213,14 +206,6 @@ public final class FrameWork {
 
             }
         }
-    }
-
-    public static <T> T registerTickable(T tickable) {
-        if (Tickable.class.isAssignableFrom(tickable.getClass())) {
-            Tickable tickable1 = (Tickable) tickable;
-            timer.schedule(tickable1, tickable1.getDelay(), tickable1.getPeriod());
-        }
-        return tickable;
     }
 
 }

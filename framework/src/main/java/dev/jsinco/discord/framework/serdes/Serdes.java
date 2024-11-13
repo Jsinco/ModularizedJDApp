@@ -6,6 +6,8 @@ import dev.jsinco.discord.framework.logging.FrameWorkLogger;
 import dev.jsinco.discord.framework.reflect.ReflectionUtil;
 import lombok.Getter;
 
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +32,23 @@ public class Serdes {
         return gson.toJson(object);
     }
 
+    public <T> void serialize(T object, FileWriter fileWriter) {
+        gson.toJson(object, fileWriter);
+    }
+
+    public <T> void serialize(T object, String path) {
+        try (FileWriter writer = new FileWriter(path)) {
+            gson.toJson(object, writer);
+        } catch (Exception e) {
+            FrameWorkLogger.error("Failed to serialize object to path " + path, e);
+        }
+    }
+
     public <T> T deserialize(String json, Class<T> schema) {
+        return gson.fromJson(json, schema);
+    }
+
+    public <T> T deserialize(FileReader json, Class<T> schema) {
         return gson.fromJson(json, schema);
     }
 

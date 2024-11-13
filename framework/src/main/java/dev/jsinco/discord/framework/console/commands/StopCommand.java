@@ -3,7 +3,8 @@ package dev.jsinco.discord.framework.console.commands;
 import dev.jsinco.discord.framework.console.ConsoleCommand;
 import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
-import dev.jsinco.discord.framework.shutdown.ShutdownManager;
+import dev.jsinco.discord.framework.scheduling.ScheduleManager;
+import dev.jsinco.discord.framework.scheduling.Tickable;
 
 public class StopCommand implements ConsoleCommand {
     @Override
@@ -14,7 +15,9 @@ public class StopCommand implements ConsoleCommand {
     @Override
     public void execute(String[] args) {
         FrameWorkLogger.info("Stopping!");
-        ShutdownManager.shutDownClasses();
+        for (Tickable tickable : ScheduleManager.getInstance().getScheduledTasks()) {
+            tickable.run();
+        }
         FrameWork.getJda().shutdownNow();
         System.exit(0);
     }

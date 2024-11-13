@@ -7,7 +7,7 @@ subprojects {
     apply(plugin = "idea")
 
     group = "dev.jsinco.discord"
-    version = "1.0-SNAPSHOT"
+    version = "1.0"
 
 
 
