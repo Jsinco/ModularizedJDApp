@@ -2,21 +2,15 @@ package dev.jsinco.discord.modules.util;
 
 import dev.jsinco.discord.framework.FrameWork;
 import dev.jsinco.discord.framework.logging.FrameWorkLogger;
-import dev.jsinco.discord.framework.util.Pair;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
